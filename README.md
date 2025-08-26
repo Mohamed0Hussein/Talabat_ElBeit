@@ -44,12 +44,12 @@ It provides a secure way to share information between family members, manage acc
 ```
 .
 ├── assets/             # Images, icons, etc.
+├── app/layout.tsx      # Entry point
 ├── components/         # Shared UI components
 ├── contexts/           # Context providers
 ├── hooks/              # Custom React hooks
 ├── utils/              # Firebase config & helpers
 │   └── firebaseConfig.ts   <-- 🔐 Must be created manually
-├── App.tsx             # Main entry point
 └── ...
 ```
 
@@ -84,8 +84,8 @@ export const app = initializeApp(firebaseConfig);
 
 1. Clone the repo:
    ```bash
-   git clone https://github.com/YOUR_USERNAME/Family-Connect.git
-   cd Family-Connect
+   git clone https://github.com/Mohamed0Hussein/Talabat_ElBeit
+   cd Talabat_ElBeit
    ```
 2. Install dependencies:
    ```bash
