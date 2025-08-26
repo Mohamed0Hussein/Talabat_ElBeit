@@ -19,10 +19,10 @@ It provides a secure way to share information between family members, manage acc
 ## 📸 Screenshots
 
 ```
-![home Screen](./assets/Screenshot_1.png)
-![added Item](./assets/Screenshot_2.png)
-![marked as bought Item](./assets/Screenshot_3.png)
-![family menu](./assets/Screenshot_4.png)
+![home Screen](./assets/images/Screenshot_1.png)
+![added Item](./assets/images/Screenshot_2.png)
+![marked as bought Item](./assets/images/Screenshot_3.png)
+![family menu](./assets/images/Screenshot_4.png)
 ```
 
 ---

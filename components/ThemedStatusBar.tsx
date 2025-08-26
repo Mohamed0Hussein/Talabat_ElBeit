@@ -1,4 +1,3 @@
-// components/ThemedStatusBar.tsx
 import { Colors } from '@/themes/colors';
 import { StatusBar, useColorScheme } from 'react-native';
 
