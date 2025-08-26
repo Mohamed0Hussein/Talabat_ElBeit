@@ -1,4 +1,3 @@
-// components/CustomHeader.tsx
 import { HeaderBackButton } from '@react-navigation/elements';
 import { useNavigation } from '@react-navigation/native';
 import { useColorScheme } from 'react-native';

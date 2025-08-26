@@ -1,4 +1,3 @@
-// components/ThemedButton.tsx
 import { Colors } from "@/themes/colors";
 import React from "react";
 import {

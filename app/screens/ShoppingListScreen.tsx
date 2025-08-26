@@ -54,7 +54,6 @@ type Member = {
 const UNITS = ["pcs", "kg", "g", "L", "mL", "pack", "box"];
 const Drawer = createDrawerNavigator();
 
-// Main Shopping List Component
 function ShoppingListMain({ route, navigation }: any) {
   const { familyName, displayName } = route.params;
   const [items, setItems] = useState<Item[]>([]);
@@ -585,8 +584,7 @@ function CustomDrawerContent(props: any) {
           onPress: async () => {
             try {
               await logout();
-              // Navigation will automatically handle going back to Auth screen
-              // due to the auth state listener in your main App component
+
               props.navigation.navigate("Auth");
             } catch (error) {
               console.error('Error signing out:', error);
@@ -796,7 +794,6 @@ const styles = StyleSheet.create({
     shadowRadius: 2,
     elevation: 2,
   },
-  // Drawer Styles
   drawerContainer: {
     flex: 1,
     paddingTop: 20,

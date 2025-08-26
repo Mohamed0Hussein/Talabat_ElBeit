@@ -18,12 +18,18 @@ It provides a secure way to share information between family members, manage acc
 
 ## 📸 Screenshots
 
-```
-![home Screen](./assets/Screenshot_1.png)
-![added Item](./assets/Screenshot_2.png)
-![marked as bought Item](./assets/Screenshot_3.png)
-![family menu](./assets/Screenshot_4.png)
-```
+### 🏠 Home Screen
+![Home Screen](./assets/images/Screenshot_1.png)
+
+### ➕ Adding an Item
+![Added Item](./assets/images/Screenshot_2.png)
+
+### ✅ Marked as Bought
+![Marked as Bought Item](./assets/images/Screenshot_3.png)
+
+### 👨‍👩‍👧 Family Menu
+![Family Menu](./assets/images/Screenshot_4.png)
+
 
 ---
 
