@@ -37,9 +37,6 @@ It provides a secure way to share information between family members, manage acc
 
 - [Expo](https://expo.dev/) – React Native framework  
 - [Firebase](https://firebase.google.com/) – Auth, Firestore, Hosting  
-- [React Navigation](https://reactnavigation.org/) – App navigation  
-- [Tailwind CSS (NativeWind)](https://www.nativewind.dev/) – Styling  
-
 ---
 
 ## 📂 Project Structure
