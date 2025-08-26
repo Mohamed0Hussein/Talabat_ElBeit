@@ -1,50 +1,117 @@
-# Welcome to your Expo app 👋
+# Family Connect 👨‍👩‍👧‍👦
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A **React Native + Expo** mobile app powered by **Firebase** that allows users to create, join, and manage families.  
+It provides a secure way to share information between family members, manage access with passwords, and maintain privacy.
 
-## Get started
+---
 
-1. Install dependencies
+## 🚀 Features
 
+- 📌 **Create Families** – Start a family group with a secure password and an owner account.  
+- 👥 **Join Families** – Join existing families by providing the correct family ID and password.  
+- 🔑 **Owner Controls** – Owners can manage members and are required to delete the family if leaving.  
+- 🔒 **Authentication** – Firebase Authentication ensures secure access for all users.  
+- ☁️ **Realtime Database & Firestore** – Keep family data synced across all members in real-time.  
+- 📱 **Cross-Platform** – Built with Expo for both iOS and Android.  
+
+---
+
+## 📸 Screenshots
+
+```
+![home Screen](./assets/Screenshot_1.png)
+![added Item](./assets/Screenshot_2.png)
+![marked as bought Item](./assets/Screenshot_3.png)
+![family menu](./assets/Screenshot_4.png)
+```
+
+---
+
+## 🛠️ Tech Stack
+
+- [Expo](https://expo.dev/) – React Native framework  
+- [Firebase](https://firebase.google.com/) – Auth, Firestore, Hosting  
+- [React Navigation](https://reactnavigation.org/) – App navigation  
+- [Tailwind CSS (NativeWind)](https://www.nativewind.dev/) – Styling  
+
+---
+
+## 📂 Project Structure
+
+```
+.
+├── assets/             # Images, icons, etc.
+├── components/         # Shared UI components
+├── contexts/           # Context providers
+├── hooks/              # Custom React hooks
+├── utils/              # Firebase config & helpers
+│   └── firebaseConfig.ts   <-- 🔐 Must be created manually
+├── App.tsx             # Main entry point
+└── ...
+```
+
+---
+
+## 🔐 Firebase Config Setup
+
+⚠️ The file `utils/firebaseConfig.ts` is **not included in the repo** for security reasons.  
+You need to create it manually:
+
+```ts
+// utils/firebaseConfig.ts
+import { initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT_ID.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID",
+};
+
+export const app = initializeApp(firebaseConfig);
+```
+
+👉 Replace with your Firebase project credentials.
+
+---
+
+## ▶️ Getting Started
+
+1. Clone the repo:
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/Family-Connect.git
+   cd Family-Connect
+   ```
+2. Install dependencies:
    ```bash
    npm install
    ```
-
-2. Start the app
-
+3. Create the `utils/firebaseConfig.ts` file as explained above.  
+4. Run the app:
    ```bash
    npx expo start
    ```
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🎯 Roadmap
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+- ✅ Basic family creation & joining  
+- ✅ Firebase authentication  
+- ⏳ Family chat & messaging  
+- ⏳ Push notifications for updates  
+- ⏳ Enhanced admin controls  
 
-## Get a fresh project
+---
 
-When you're ready, run:
+## 🤝 Contributing
 
-```bash
-npm run reset-project
-```
+Pull requests are welcome! If you’d like to add a feature or fix a bug, open an issue first to discuss.
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 📜 License
 
-To learn more about developing your project with Expo, look at the following resources:
-
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
-
-## Join the community
-
-Join our community of developers creating universal apps.
-
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+MIT License © 2025
