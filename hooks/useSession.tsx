@@ -1,5 +1,5 @@
 import { type User, onAuthStateChanged } from 'firebase/auth';
-import { doc, getDoc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, getDocFromServer, onSnapshot, waitForPendingWrites } from 'firebase/firestore';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { displayNameOf } from '@/lib/familyName';
 import { useLanguage } from '@/i18n/LanguageProvider';
@@ -28,6 +28,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [familyId, setFamilyId] = useState<string | null | undefined>(undefined);
   const [membership, setMembership] = useState<'checking' | 'ok' | 'gone'>('checking');
   const [notice, setNotice] = useState<SessionNotice>(null);
+  // Bumped to re-subscribe when a listener failed only because our own write wasn't saved yet.
+  const [resubscribe, setResubscribe] = useState(0);
   const memberRef = useRef<{ expoPushToken?: string; language?: string } | null>(null);
   const { lang } = useLanguage();
 
@@ -38,9 +40,14 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     setFamilyId(undefined);
     if (!uid) return;
+    // Only trust saved data: a join with the wrong password is applied locally first, then rolled back.
     return onSnapshot(
       doc(db, 'users', uid),
-      (snap) => setFamilyId((snap.data()?.familyId as string | null | undefined) ?? null),
+      { includeMetadataChanges: true },
+      (snap) => {
+        if (snap.metadata.hasPendingWrites) return;
+        setFamilyId((snap.data()?.familyId as string | null | undefined) ?? null);
+      },
       () => setFamilyId(null),
     );
   }, [uid]);
@@ -64,19 +71,36 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       setNotice(stillExists ? 'removed' : 'familyDeleted');
       await clearUserFamily(db, uid).catch(() => undefined);
     };
+    const memberDoc = doc(db, 'families', familyId, 'members', uid);
+    // Right after creating or joining, the listener can start before the server has our member
+    // record and be refused. So check with the server once our own writes are saved before deciding.
+    const confirmGone = async () => {
+      await waitForPendingWrites(db).catch(() => undefined);
+      const exists = await getDocFromServer(memberDoc)
+        .then((s) => s.exists())
+        .catch((e) => (isDenied(e) ? false : null));
+      if (exists === null) return; // offline: decide later
+      if (exists && resubscribe < 3) setResubscribe((n) => n + 1);
+      else if (!exists) gone();
+    };
     return onSnapshot(
-      doc(db, 'families', familyId, 'members', uid),
+      memberDoc,
+      { includeMetadataChanges: true },
       (snap) => {
-        if (!snap.exists()) return gone();
+        if (snap.metadata.hasPendingWrites) return;
+        if (!snap.exists()) {
+          if (!snap.metadata.fromCache) confirmGone();
+          return;
+        }
         memberRef.current = snap.data();
         setMembership('ok');
       },
       (e) => {
-        // Non-members can't read member records, so "denied" also means gone. Other errors (offline) are retried.
-        if (isDenied(e)) gone();
+        // Non-members can't read member records, so "denied" can mean gone. Other errors (offline) are retried.
+        if (isDenied(e)) confirmGone();
       },
     );
-  }, [uid, familyId]);
+  }, [uid, familyId, resubscribe]);
 
   // Once in a family: keep this phone's push token and the chosen language on our member record.
   useEffect(() => {
