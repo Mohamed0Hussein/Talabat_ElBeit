@@ -132,5 +132,13 @@
     "accountCooldown": "Too many wrong passwords. Try again at {{time}}.",
     "familyBusy": "This family has had too many join attempts. Try again at {{time}}.",
     "generic": "Something went wrong. Try again."
+  },
+  "notFound": {
+    "title": "This page doesn't exist.",
+    "home": "Go to the list"
+  },
+  "language": {
+    "en": "English",
+    "ar": "عربي"
   }
 }

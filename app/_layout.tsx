@@ -1,86 +1,76 @@
-import { Colors } from '@/themes/colors';
-import { getUserFamily } from '@/utils/familyHelpers';
-import { auth } from '@/utils/firebaseConfig';
-import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { onAuthStateChanged, User } from 'firebase/auth';
-import React, { useEffect, useState } from 'react';
-import { StatusBar, useColorScheme } from 'react-native';
-import AuthScreen from './screens/AuthScreen';
-import FamilySelectScreen from './screens/FamilySelectScreen';
-import ShoppingListScreen from './screens/ShoppingListScreen';
+import {
+  Cairo_400Regular,
+  Cairo_600SemiBold,
+  Cairo_700Bold,
+  Cairo_800ExtraBold,
+  useFonts,
+} from '@expo-google-fonts/cairo';
+import { Stack } from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+import { StatusBar } from 'expo-status-bar';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, View } from 'react-native';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { type SessionStatus, SessionProvider, useSession } from '@/hooks/useSession';
+import '@/i18n';
+import { LanguageProvider } from '@/i18n/LanguageProvider';
+import { ThemeProvider, useTheme } from '@/theme/ThemeProvider';
 
-const Stack = createNativeStackNavigator();
+SplashScreen.preventAutoHideAsync().catch(() => undefined);
 
-type Family = {
-  familyId : string,
-  familyName : string,
+export default function RootLayout() {
+  const [fontsLoaded] = useFonts({ Cairo_400Regular, Cairo_600SemiBold, Cairo_700Bold, Cairo_800ExtraBold });
+  return (
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <ThemeProvider>
+          <LanguageProvider>
+            <SessionProvider>{fontsLoaded ? <RootStack /> : null}</SessionProvider>
+          </LanguageProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
+  );
 }
-export default function App() {
-  const scheme = useColorScheme();
-  const themeColors = scheme === 'dark' ? Colors.dark : Colors.light;
 
-  const [user, setUser] = useState<User|null>(null);
-  const [loading, setLoading] = useState(true);
-  const [family, setFamily] = useState<Family | null>(null);
+function RootStack() {
+  const { status } = useSession();
+  const { c } = useTheme();
+  // Keep showing the current screen while the session briefly re-checks (e.g. right after joining).
+  const [shown, setShown] = useState<Exclude<SessionStatus, 'loading'> | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      
-      if (currentUser) {
-        const family = await getUserFamily();
-        setFamily(family);
-        
-      } else {
-        setFamily(null);
-      }
-      setLoading(false);
-    });
-    return unsubscribe;
+    SplashScreen.hideAsync().catch(() => undefined);
   }, []);
+  useEffect(() => {
+    if (status !== 'loading') setShown(status);
+  }, [status]);
 
-
-
-  if (loading) return null;
+  if (!shown) {
+    return (
+      <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
+        <ActivityIndicator color={c.primary} size="large" />
+      </View>
+    );
+  }
 
   return (
     <>
-      <StatusBar
-        barStyle={scheme === 'dark' ? 'light-content' : 'dark-content'}
-        backgroundColor={themeColors.statusBar}
-      />
-      <Stack.Navigator
-        initialRouteName={
-          !user ? "Auth" : 
-          family?.familyId ? "Shopping List" : "Family Select"
-        }
-        screenOptions={{
-          headerStyle: { backgroundColor: themeColors.headerBackground },
-          headerTintColor: themeColors.headerText,
-          headerTitleStyle: { fontWeight: '600' },
-          contentStyle: { backgroundColor: themeColors.background },
-        }}
-      > 
-          <Stack.Screen name="Auth" component={AuthScreen} options={{ headerShown: false }} />
-          <Stack.Screen
-            name="Family Select"
-            component={FamilySelectScreen}
-            options={{ title: 'Create or Join Family' }}
-          />
-
-        <Stack.Screen
-          name="Shopping List"
-          component={ShoppingListScreen}
-          initialParams={{ 
-            familyName: family?.familyName || '',
-            displayName: family?.familyName ,
-          }}
-          options={() => ({ 
-            headerBackVisible:false,
-            title: 'Shopping List'
-          })}
-        />
-      </Stack.Navigator>
+      {/* Every screen starts with the dark teal band, so the status bar text is always light. */}
+      <StatusBar style="light" />
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.bg } }}>
+        <Stack.Protected guard={shown === 'signedOut'}>
+          <Stack.Screen name="sign-in" />
+        </Stack.Protected>
+        <Stack.Protected guard={shown === 'needsFamily'}>
+          <Stack.Screen name="family-setup" />
+        </Stack.Protected>
+        <Stack.Protected guard={shown === 'ready'}>
+          <Stack.Screen name="index" />
+          <Stack.Screen name="family" options={{ presentation: 'modal' }} />
+        </Stack.Protected>
+      </Stack>
     </>
   );
 }
