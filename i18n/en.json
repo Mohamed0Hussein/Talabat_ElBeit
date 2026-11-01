@@ -9,7 +9,9 @@
     "you": "you",
     "decrease": "Less",
     "increase": "More",
-    "delete": "Delete"
+    "delete": "Delete",
+    "waitingTitle": "Waiting for a connection…",
+    "waitingBody": "Check your internet. The app carries on by itself once it's back."
   },
   "auth": {
     "tagline": "One shopping list for the whole family.",

@@ -3,7 +3,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, Pressable, SectionList, View } from 'react-native';
+import { Platform, Pressable, SectionList, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { confirm } from '@/components/confirm';
 import { AddBar } from '@/components/list/AddBar';
@@ -12,6 +12,7 @@ import { ItemRow } from '@/components/list/ItemRow';
 import { SectionHeader } from '@/components/list/SectionHeader';
 import { AppText } from '@/components/ui/AppText';
 import { AvatarStack } from '@/components/ui/Avatar';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { PatternBand } from '@/components/ui/PatternBand';
 import { Snackbar } from '@/components/ui/Snackbar';
 import { useFamily, useItems, useMembers } from '@/hooks/useFamilyData';
@@ -157,9 +158,7 @@ export default function ListScreen() {
       </PatternBand>
 
       {loading ? (
-        <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
-          <ActivityIndicator color={c.primary} />
-        </View>
+        <LoadingState />
       ) : visible.length === 0 ? (
         <View style={{ flex: 1, alignItems: 'center', justifyContent: 'center', gap: 8, padding: 32 }}>
           <Ionicons name="basket-outline" size={48} color={c.muted} />

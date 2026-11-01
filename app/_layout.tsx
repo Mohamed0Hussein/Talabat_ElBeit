@@ -9,9 +9,9 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
 import { useEffect, useState } from 'react';
-import { ActivityIndicator, View } from 'react-native';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { LoadingState } from '@/components/ui/LoadingState';
 import { type SessionStatus, SessionProvider, useSession } from '@/hooks/useSession';
 import '@/i18n';
 import { LanguageProvider } from '@/i18n/LanguageProvider';
@@ -47,13 +47,7 @@ function RootStack() {
     if (status !== 'loading') setShown(status);
   }, [status]);
 
-  if (!shown) {
-    return (
-      <View style={{ flex: 1, backgroundColor: c.bg, alignItems: 'center', justifyContent: 'center' }}>
-        <ActivityIndicator color={c.primary} size="large" />
-      </View>
-    );
-  }
+  if (!shown) return <LoadingState />;
 
   return (
     <>
