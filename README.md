@@ -1,120 +1,90 @@
-# Family Connect 👨‍👩‍👧‍👦
+# Talabat ElBeit · طلبات البيت
 
-A **React Native + Expo** mobile app powered by **Firebase** that allows users to create, join, and manage families.  
-It provides a secure way to share information between family members, manage access with passwords, and maintain privacy.
+A shared shopping list for the whole family, in Arabic and English. Built with Expo (React Native) and Firebase.
 
----
+<p>
+  <img src="docs/screenshots/list.png" width="200" alt="Shopping list in English">
+  <img src="docs/screenshots/add-item.png" width="200" alt="Adding an item">
+  <img src="docs/screenshots/list-arabic-dark.png" width="200" alt="Shopping list in Arabic, dark theme">
+  <img src="docs/screenshots/family.png" width="200" alt="Family sheet">
+</p>
 
-## 🚀 Features
+## What it does
 
-- 📌 **Create Families** – Start a family group with a secure password and an owner account.  
-- 👥 **Join Families** – Join existing families by providing the correct family ID and password.  
-- 🔑 **Owner Controls** – Owners can manage members and are required to delete the family if leaving.  
-- 🔒 **Authentication** – Firebase Authentication ensures secure access for all users.  
-- ☁️ **Realtime Database & Firestore** – Keep family data synced across all members in real-time.  
-- 📱 **Cross-Platform** – Built with Expo for both iOS and Android.  
+- **One list per family.** Everyone sees changes live: items, who added them, who bought them.
+- **Quick adding.** Name, quantity, unit (pcs, kg, g, L, mL, pack, box) and an optional "needed by" time: No rush, Today, Tomorrow, or a time you pick.
+- **To buy, then Bought.** Tap to mark bought. Overdue items are flagged in red. Swipe to delete, with Undo.
+- **Notifications.** Other members get a push notification in their own language when you add, buy or remove something.
+- **Arabic and English.** Full right-to-left layout and Arabic digits (٢ كجم).
+- **Light and dark** themes, following the phone.
 
----
+## Getting started
 
-## 📸 Screenshots
-
-### 🏠 Home Screen
-![Home Screen](./assets/images/Screenshot_1.png)
-
-### ➕ Adding an Item
-![Added Item](./assets/images/Screenshot_2.png)
-
-### ✅ Marked as Bought
-![Marked as Bought Item](./assets/images/Screenshot_3.png)
-
-### 👨‍👩‍👧 Family Menu
-![Family Menu](./assets/images/Screenshot_4.png)
-
-
----
-
-## 🛠️ Tech Stack
-
-- [Expo](https://expo.dev/) – React Native framework  
-- [Firebase](https://firebase.google.com/) – Auth, Firestore, Hosting  
----
-
-## 📂 Project Structure
-
-```
-.
-├── assets/             # Images, icons, etc.
-├── app/layout.tsx      # Entry point
-├── components/         # Shared UI components
-├── contexts/           # Context providers
-├── hooks/              # Custom React hooks
-├── utils/              # Firebase config & helpers
-│   └── firebaseConfig.ts   <-- 🔐 Must be created manually
-└── ...
-```
-
----
-
-## 🔐 Firebase Config Setup
-
-⚠️ The file `utils/firebaseConfig.ts` is **not included in the repo** for security reasons.  
-You need to create it manually:
-
-```ts
-// utils/firebaseConfig.ts
-import { initializeApp } from "firebase/app";
-
-const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID",
-};
-
-export const app = initializeApp(firebaseConfig);
-```
-
-👉 Replace with your Firebase project credentials.
-
----
-
-## ▶️ Getting Started
-
-1. Clone the repo:
-   ```bash
-   git clone https://github.com/Mohamed0Hussein/Talabat_ElBeit
-   cd Talabat_ElBeit
-   ```
-2. Install dependencies:
+1. Install dependencies:
    ```bash
    npm install
    ```
-3. Create the `utils/firebaseConfig.ts` file as explained above.  
-4. Run the app:
+2. Create a Firebase project. In the Firebase console:
+   - **Authentication → Sign-in method:** enable **Email/Password**. Leave **Anonymous** off.
+   - **Firestore:** create a database.
+   - **Project settings → Your apps:** add a Web app and copy its config.
+3. Copy `.env.example` to `.env.local` and fill in the values from that config.
+4. Deploy the security rules (see [Security](#security)):
+   ```bash
+   npx firebase deploy --only firestore:rules --project YOUR_PROJECT_ID
+   ```
+5. Run the app:
    ```bash
    npx expo start
    ```
+   Push notifications need a development build (`npx expo run:android` / `npx expo run:ios`, or EAS Build).
 
----
+### Running against local emulators
 
-## 🎯 Roadmap
+No Firebase project needed:
 
-- ✅ Basic family creation & joining  
-- ✅ Firebase authentication  
-- ⏳ Family chat & messaging  
-- ⏳ Push notifications for updates  
-- ⏳ Enhanced admin controls  
+```bash
+npx firebase emulators:start --only auth,firestore --project demo-talabat
+```
 
----
+Then start the app with `EXPO_PUBLIC_USE_EMULATORS=1` (in `.env.local` or on the command line).
 
-## 🤝 Contributing
+## Security
 
-Pull requests are welcome! If you’d like to add a feature or fix a bug, open an issue first to discuss.
+Family data is protected by [`firestore.rules`](firestore.rules), enforced by Firebase's servers. The app only displays what the rules allow.
 
----
+- A family's items and members are readable only by its members.
+- The family password is stored as a salted SHA-256 hash that no client can read. To join, the app records your guess first, and the rules only let you become a member if that recorded guess matches.
+- Guessing is rate-limited by the rules themselves:
+  - **Per account:** 5 attempts, then one every 15 minutes, then one an hour after 10.
+  - **Per family:** at most 10 attempts an hour, across all accounts.
+- Family passwords must be at least 8 characters.
 
-## 📜 License
+## Tests
+
+```bash
+npm test            # unit tests: name rules, lockout maths, dates, translations, push messages
+npm run test:rules  # security rules and Firestore services, against the Firestore emulator (needs Java 21)
+npm run typecheck
+npm run lint
+```
+
+## Project layout
+
+```
+app/                Screens (expo-router): sign-in, family-setup, index (the list), family
+components/ui/      Themed building blocks: text, buttons, fields, chips, sheet, pattern band…
+components/list/    List rows, add bar, add-item sheet
+hooks/              Session (auth + family membership), live family data, clock
+services/           Firebase setup and Firestore operations (families, items, users, push)
+lib/                Pure logic with unit tests
+i18n/               English and Arabic strings, language switching
+theme/              Mashrabiya colors, spacing, type
+firestore.rules     Server-side security rules
+tests/rules/        Emulator tests for the rules and services
+docs/               Design spec, implementation plan, design directions
+```
+
+## License
 
 MIT License © 2025
