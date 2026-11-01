@@ -3,7 +3,7 @@ rules_version = '2';
 // Talabat ElBeit security rules.
 //
 // Families are private to their members. Joining needs the family password,
-// checked here on the server. Every guess is first recorded in
+// checked here on the server, from a guess made in the last 10 minutes. Every guess is first recorded in
 // joinAttempts/{uid} and counted in meta/joinLimit, and both are rate-limited:
 //   - per account: 5 free attempts, then one per 15 minutes, then one per hour after 10;
 //   - per family: at most 10 attempts per hour, from all accounts together.
@@ -112,13 +112,16 @@ service cloud.firestore {
 
       // The password hash. Never readable; rules compare against it.
       match /secret/{docId} {
+        function hashOk() {
+          return request.resource.data.keys().hasOnly(['hash'])
+            && request.resource.data.hash is string
+            && request.resource.data.hash.size() == 64;
+        }
+
         allow read: if false;
-        allow create: if docId == 'password'
-          && creatingFamily(fid)
-          && request.resource.data.keys().hasOnly(['hash'])
-          && request.resource.data.hash is string
-          && request.resource.data.hash.size() == 64;
-        allow update: if false;
+        allow create: if docId == 'password' && creatingFamily(fid) && hashOk();
+        // The creator can change the family password.
+        allow update: if isCreator(fid) && hashOk();
         allow delete: if isCreator(fid);
       }
 
@@ -201,9 +204,13 @@ service cloud.firestore {
             && isLang(d.language);
         }
 
+        // The latest recorded guess matches the current password and is fresh, so an old
+        // correct guess can't be reused after leaving, being removed, or a password change.
         function passwordChecked() {
+          let attempt = get(attemptPath(fid, uid)).data;
           return exists(familyPath(fid))
-            && get(attemptPath(fid, uid)).data.proof == get(secretPath(fid)).data.hash;
+            && attempt.proof == get(secretPath(fid)).data.hash
+            && request.time < attempt.at + duration.value(10, 'm');
         }
 
         allow read: if isMember(fid);

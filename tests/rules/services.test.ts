@@ -2,11 +2,13 @@ import { type RulesTestEnvironment } from '@firebase/rules-unit-testing';
 import { type Firestore, Timestamp, collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
 import { AppError } from '@/lib/errors';
 import {
+  changeFamilyPassword,
   clearUserFamily,
   createFamily,
   deleteFamily,
   joinFamily,
   leaveFamily,
+  removeMember,
   updateMyMember,
 } from '@/services/families';
 import { addItem, clearBought, deleteItem, setBought } from '@/services/items';
@@ -188,6 +190,32 @@ describe('leaving and deleting', () => {
       language: 'ar',
       expoPushToken: 'ExponentPushToken[a]',
     });
+  });
+});
+
+describe('managing members', () => {
+  it('lets the creator change the password: the old one stops working', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await changeFamilyPassword(dbAs(env, 'alice'), familyId, 'a-new-password');
+    await expect(joinFamily(dbAs(env, 'bob'), bob, input())).rejects.toMatchObject({ code: 'wrongPassword' });
+    await expect(joinFamily(dbAs(env, 'bob'), bob, input({ password: 'a-new-password' }))).resolves.toEqual({ familyId });
+  });
+
+  it('only lets the creator change the password', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await joinFamily(dbAs(env, 'bob'), bob, input());
+    await expect(changeFamilyPassword(dbAs(env, 'bob'), familyId, 'bobs-password')).rejects.toMatchObject({
+      code: 'permission-denied',
+    });
+  });
+
+  it('lets the creator remove a member, who then needs the current password to come back', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await joinFamily(dbAs(env, 'bob'), bob, input());
+    await removeMember(dbAs(env, 'alice'), familyId, 'bob');
+    expect((await adminGet('families', familyId, 'members', 'bob')).exists).toBe(false);
+    await changeFamilyPassword(dbAs(env, 'alice'), familyId, 'a-new-password');
+    await expect(joinFamily(dbAs(env, 'bob'), bob, input())).rejects.toMatchObject({ code: 'wrongPassword' });
   });
 });
 

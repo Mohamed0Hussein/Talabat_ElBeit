@@ -216,5 +216,5 @@ Never use letter-spacing on Arabic text.
 
 ## 7. Out of scope
 
-Invite links, App Check, Cloud Functions, removing other members, renaming a family,
-changing the family password.
+Invite links, App Check, Cloud Functions, renaming a family.
+(Removing members and changing the family password were added in a follow-up.)

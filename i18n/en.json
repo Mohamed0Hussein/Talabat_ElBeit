@@ -102,7 +102,15 @@
     "deleteBody": "This deletes the family and its whole list for everyone. It can't be undone.",
     "signOut": "Sign out",
     "signOutTitle": "Sign out?",
-    "close": "Close"
+    "close": "Close",
+    "remove": "Remove {{name}}",
+    "removeTitle": "Remove {{name}}?",
+    "removeBody": "They'll stop seeing the list. To keep them out, also change the family password.",
+    "changePassword": "Change family password",
+    "changePasswordBody": "Members who are already in stay in. Share the new password with anyone who still needs to join.",
+    "newPassword": "New family password",
+    "save": "Save password",
+    "passwordChanged": "Family password changed."
   },
   "settings": {
     "reopenTitle": "Almost done",

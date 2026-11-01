@@ -3,10 +3,12 @@ import {
   type Firestore,
   type Timestamp,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
   serverTimestamp,
+  setDoc,
   updateDoc,
   writeBatch,
 } from 'firebase/firestore';
@@ -236,4 +238,15 @@ export async function updateMyMember(
   patch: Partial<Pick<Member, 'displayName' | 'expoPushToken' | 'language'>>,
 ): Promise<void> {
   await updateDoc(doc(db, 'families', familyId, 'members', uid), patch);
+}
+
+/** Creator only. Old guesses stop working at once; members already in the family stay in. */
+export async function changeFamilyPassword(db: Firestore, familyId: string, newPassword: string): Promise<void> {
+  const hash = await sha256Hex(passwordHashInput(familyId, newPassword));
+  await setDoc(doc(db, 'families', familyId, 'secret', 'password'), { hash });
+}
+
+/** Creator only. To keep them out, change the password too. */
+export async function removeMember(db: Firestore, familyId: string, memberId: string): Promise<void> {
+  await deleteDoc(doc(db, 'families', familyId, 'members', memberId));
 }

@@ -5,6 +5,7 @@ import {
   NAME_KEY,
   PASSWORD,
   attemptBatch,
+  hashFor,
   createFamilyBatch,
   dbAs,
   joinBatch,
@@ -104,6 +105,16 @@ describe('joining', () => {
     const bob = dbAs(env, 'bob');
     await assertSucceeds(attemptBatch(bob, 'bob', 'wrong-password', { prevCount: 0, limit }).commit());
     await assertFails(joinBatch(bob, 'bob').commit());
+  });
+
+  it('refuses a correct attempt made more than 10 minutes ago', async () => {
+    await seedFamily(env, { attempts: { bob: { count: 1, at: minutesAgo(11), proof: hashFor(FID, PASSWORD) } } });
+    await assertFails(joinBatch(dbAs(env, 'bob'), 'bob').commit());
+  });
+
+  it('accepts a correct attempt from the last 10 minutes', async () => {
+    await seedFamily(env, { attempts: { bob: { count: 1, at: minutesAgo(5), proof: hashFor(FID, PASSWORD) } } });
+    await assertSucceeds(joinBatch(dbAs(env, 'bob'), 'bob').commit());
   });
 
   it('refuses an attempt that does not count against the family limit', async () => {
@@ -210,6 +221,24 @@ describe('members', () => {
   it('lets only the creator remove another member', async () => {
     await assertFails(deleteDoc(doc(dbAs(env, 'mona'), 'families', FID, 'members', 'ahmed')));
     await assertSucceeds(deleteDoc(doc(dbAs(env, 'owner'), 'families', FID, 'members', 'ahmed')));
+  });
+});
+
+describe('changing the password', () => {
+  beforeEach(() => seedFamily(env, { members: ['mona'] }));
+  const newHash = hashFor(FID, 'a-new-password');
+
+  it('lets the creator replace the password hash', async () => {
+    await assertSucceeds(setDoc(doc(dbAs(env, 'owner'), 'families', FID, 'secret', 'password'), { hash: newHash }));
+  });
+
+  it('refuses other members', async () => {
+    await assertFails(setDoc(doc(dbAs(env, 'mona'), 'families', FID, 'secret', 'password'), { hash: newHash }));
+  });
+
+  it('refuses anything that is not a 64-character hash', async () => {
+    await assertFails(setDoc(doc(dbAs(env, 'owner'), 'families', FID, 'secret', 'password'), { hash: 'short' }));
+    await assertFails(setDoc(doc(dbAs(env, 'owner'), 'families', FID, 'secret', 'password'), { hash: newHash, note: 'x' }));
   });
 });
 

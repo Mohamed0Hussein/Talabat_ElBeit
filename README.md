@@ -58,6 +58,8 @@ Family data is protected by [`firestore.rules`](firestore.rules), enforced by Fi
 - Guessing is rate-limited by the rules themselves:
   - **Per account:** 5 attempts, then one every 15 minutes, then one an hour after 10.
   - **Per family:** at most 10 attempts an hour, across all accounts.
+- A join only counts a guess made in the last 10 minutes, so an old correct guess can't be reused.
+- The family's creator can remove members and change the family password. Members already in the family stay in after a password change.
 - Family passwords must be at least 8 characters.
 
 ## Tests

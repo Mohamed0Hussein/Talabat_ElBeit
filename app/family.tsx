@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { confirm } from '@/components/confirm';
+import { ChangePasswordSheet } from '@/components/family/ChangePasswordSheet';
 import { LanguageToggle } from '@/components/LanguageToggle';
 import { AppText } from '@/components/ui/AppText';
 import { Avatar } from '@/components/ui/Avatar';
@@ -16,7 +17,7 @@ import { useSession, useWho } from '@/hooks/useSession';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { errorMessage } from '@/i18n/errorMessage';
 import { formatNumber } from '@/lib/format';
-import { deleteFamily, leaveFamily } from '@/services/families';
+import { changeFamilyPassword, deleteFamily, leaveFamily, removeMember } from '@/services/families';
 import { auth, db } from '@/services/firebase';
 import { useTheme } from '@/theme/ThemeProvider';
 
@@ -31,7 +32,28 @@ export default function FamilySheet() {
   const members = useMembers(familyId);
   const [busy, setBusy] = useState<'leave' | 'delete' | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [passwordSheet, setPasswordSheet] = useState(false);
+  const [info, setInfo] = useState<string | null>(null);
   const isCreator = !!family && family.creatorId === who.uid;
+
+  const onRemove = async (member: { id: string; displayName: string }) => {
+    if (!familyId) return;
+    const ok = await confirm(
+      t('family.removeTitle', { name: member.displayName }),
+      t('family.removeBody'),
+      t('family.remove', { name: member.displayName }),
+      t('common.cancel'),
+    );
+    if (!ok) return;
+    setError(null);
+    removeMember(db, familyId, member.id).catch((e) => setError(errorMessage(e, lang)));
+  };
+
+  const onChangePassword = async (password: string) => {
+    if (!familyId) return;
+    await changeFamilyPassword(db, familyId, password);
+    setInfo(t('family.passwordChanged'));
+  };
 
   const run = async (kind: 'leave' | 'delete') => {
     if (!familyId) return;
@@ -108,6 +130,16 @@ export default function FamilySheet() {
                   ) : null}
                 </View>
                 {m.id === family?.creatorId ? <Ionicons name="star" size={16} color={c.accent} /> : null}
+                {isCreator && m.id !== who.uid ? (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={t('family.remove', { name: m.displayName })}
+                    onPress={() => onRemove(m)}
+                    hitSlop={8}
+                  >
+                    <Ionicons name="person-remove-outline" size={20} color={c.danger} />
+                  </Pressable>
+                ) : null}
               </View>
             ))}
           </View>
@@ -126,6 +158,18 @@ export default function FamilySheet() {
           </AppText>
           <AppText tone="muted">{t('family.signedInAs', { name: who.displayName })}</AppText>
           {error ? <AppText tone="danger">{error}</AppText> : null}
+          {info ? <AppText tone="primary">{info}</AppText> : null}
+          {isCreator ? (
+            <Button
+              title={t('family.changePassword')}
+              variant="ghost"
+              icon="key-outline"
+              onPress={() => {
+                setInfo(null);
+                setPasswordSheet(true);
+              }}
+            />
+          ) : null}
           {isCreator ? (
             <Button title={t('family.delete')} variant="danger" icon="trash-outline" loading={busy === 'delete'} onPress={() => run('delete')} />
           ) : (
@@ -134,6 +178,7 @@ export default function FamilySheet() {
           <Button title={t('family.signOut')} variant="ghost" icon="log-out-outline" onPress={onSignOut} />
         </View>
       </ScrollView>
+      <ChangePasswordSheet visible={passwordSheet} onClose={() => setPasswordSheet(false)} onSave={onChangePassword} />
     </View>
   );
 }
