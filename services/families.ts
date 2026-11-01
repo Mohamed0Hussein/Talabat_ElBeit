@@ -204,12 +204,18 @@ async function deleteInChunks(db: Firestore, refs: DocumentReference[]) {
   }
 }
 
-/** Creator only. Items first, then other members, then everything else in one final batch. */
+/**
+ * Creator only. The join counter goes first: it stops new joins, and other members' apps read
+ * its absence as "the family was deleted" rather than "you were removed". Then items, other
+ * members, and everything else in one final batch.
+ */
 export async function deleteFamily(db: Firestore, uid: string, familyId: string): Promise<void> {
   const familyRef = doc(db, 'families', familyId);
   const family = await getDoc(familyRef);
   if (!family.exists()) return;
   const nameKey = family.data().nameKey as string;
+
+  await deleteDoc(doc(familyRef, 'meta', 'joinLimit'));
 
   const items = await getDocs(collection(familyRef, 'items'));
   await deleteInChunks(db, items.docs.map((d) => d.ref));
@@ -218,7 +224,6 @@ export async function deleteFamily(db: Firestore, uid: string, familyId: string)
 
   const batch = writeBatch(db);
   batch.delete(doc(familyRef, 'secret', 'password'));
-  batch.delete(doc(familyRef, 'meta', 'joinLimit'));
   batch.delete(doc(db, 'familyNames', nameKey));
   batch.delete(doc(familyRef, 'members', uid));
   batch.delete(familyRef);

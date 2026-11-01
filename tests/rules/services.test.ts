@@ -1,5 +1,5 @@
 import { type RulesTestEnvironment } from '@firebase/rules-unit-testing';
-import { type Firestore, Timestamp, collection, doc, getDoc, getDocs, setDoc } from 'firebase/firestore';
+import { type Firestore, Timestamp, collection, doc, getDoc, getDocs, onSnapshot, setDoc } from 'firebase/firestore';
 import { AppError } from '@/lib/errors';
 import {
   changeFamilyPassword,
@@ -181,6 +181,33 @@ describe('leaving and deleting', () => {
     expect((await adminGet('users', 'bob')).data?.familyId).toBeNull();
     // The name can be used again.
     await expect(createFamily(dbAs(env, 'bob'), bob, input())).resolves.toHaveProperty('familyId');
+  });
+
+  it('removes the join counter before other members, so their apps say the family was deleted', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await joinFamily(dbAs(env, 'bob'), bob, input());
+    const order: string[] = [];
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      const db = ctx.firestore() as unknown as Firestore;
+      const watch = (label: string, ref: ReturnType<typeof doc>) =>
+        new Promise<() => void>((resolve) => {
+          let first = true;
+          const unsubscribe = onSnapshot(ref, (snap) => {
+            if (first) {
+              first = false;
+              resolve(unsubscribe);
+            } else if (!snap.exists()) order.push(label);
+          });
+        });
+      const stops = await Promise.all([
+        watch('joinLimit', doc(db, 'families', familyId, 'meta', 'joinLimit')),
+        watch('bob', doc(db, 'families', familyId, 'members', 'bob')),
+      ]);
+      await deleteFamily(dbAs(env, 'alice'), 'alice', familyId);
+      await new Promise((r) => setTimeout(r, 500));
+      stops.forEach((stop) => stop());
+    });
+    expect(order).toEqual(['joinLimit', 'bob']);
   });
 
   it('updates your own member record', async () => {
