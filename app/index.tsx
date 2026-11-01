@@ -120,8 +120,10 @@ export default function ListScreen() {
   };
 
   const summary =
-    toBuy.length === 0
-      ? t('list.allDone')
+    visible.length === 0
+      ? ''
+      : toBuy.length === 0
+        ? t('list.allDone')
       : overdue > 0
         ? t('list.summaryOverdue', { toBuy: n(toBuy.length), overdue: n(overdue) })
         : t('list.summary', { toBuy: n(toBuy.length) });

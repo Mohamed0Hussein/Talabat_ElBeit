@@ -1,6 +1,7 @@
-import { Text, type TextProps } from 'react-native';
+import { Platform, Text, type TextProps } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { useTheme } from '@/theme/ThemeProvider';
+import { startAlign } from '@/lib/layout';
 
 export type TextVariant = 'title' | 'heading' | 'body' | 'bodyStrong' | 'caption' | 'section';
 export type TextTone = 'default' | 'muted' | 'primary' | 'danger' | 'onBand' | 'onPrimary' | 'onAccent';
@@ -21,7 +22,7 @@ export function AppText({
   ...rest
 }: TextProps & { variant?: TextVariant; tone?: TextTone }) {
   const { c, font } = useTheme();
-  const { lang } = useLanguage();
+  const { lang, isRTL } = useLanguage();
   const v = VARIANTS[variant];
   const color = {
     default: c.text,
@@ -37,7 +38,11 @@ export function AppText({
   return (
     <Text
       {...rest}
-      style={[{ fontFamily: font[v.weight], fontSize: v.size, lineHeight: v.lineHeight, color }, sectionStyle, style]}
+      style={[
+        { fontFamily: font[v.weight], fontSize: v.size, lineHeight: v.lineHeight, color, textAlign: startAlign(isRTL, Platform.OS) },
+        sectionStyle,
+        style,
+      ]}
     />
   );
 }
