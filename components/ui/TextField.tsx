@@ -1,7 +1,8 @@
 import { forwardRef, useState } from 'react';
-import { TextInput, type TextInputProps, View } from 'react-native';
+import { Platform, TextInput, type TextInputProps, View } from 'react-native';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { useTheme } from '@/theme/ThemeProvider';
+import { startAlign } from '@/lib/layout';
 import { AppText } from './AppText';
 
 type Props = TextInputProps & { label: string; error?: string | null; hint?: string };
@@ -39,7 +40,7 @@ export const TextField = forwardRef<TextInput, Props>(function TextField({ label
             color: c.text,
             fontFamily: font.semibold,
             fontSize: 16,
-            textAlign: isRTL ? 'right' : 'left',
+            textAlign: startAlign(isRTL, Platform.OS),
           },
           style,
         ]}
