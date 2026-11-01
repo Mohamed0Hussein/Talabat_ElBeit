@@ -8,7 +8,8 @@
     "undo": "تراجع",
     "you": "إنت",
     "decrease": "أقل",
-    "increase": "أكتر"
+    "increase": "أكتر",
+    "delete": "امسح"
   },
   "auth": {
     "tagline": "قايمة طلبات واحدة للعيلة كلها.",
