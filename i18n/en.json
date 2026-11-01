@@ -1,0 +1,136 @@
+{
+  "app": {
+    "name": "Talabat ElBeit"
+  },
+  "common": {
+    "cancel": "Cancel",
+    "ok": "OK",
+    "undo": "Undo",
+    "you": "you",
+    "decrease": "Less",
+    "increase": "More"
+  },
+  "auth": {
+    "tagline": "One shopping list for the whole family.",
+    "signInTab": "Sign in",
+    "signUpTab": "Create account",
+    "name": "Your name",
+    "email": "Email",
+    "password": "Password",
+    "signIn": "Sign in",
+    "signUp": "Create account",
+    "missingFields": "Fill in every field.",
+    "nameHint": "Your family sees this name next to what you add."
+  },
+  "familySetup": {
+    "title": "Find your family",
+    "subtitle": "Join the list your family already uses, or start a new one.",
+    "joinTab": "Join",
+    "createTab": "Create",
+    "name": "Family name",
+    "password": "Family password",
+    "join": "Join family",
+    "create": "Create family",
+    "joinHint": "Ask whoever created the family for its name and password.",
+    "passwordHint": "At least 8 characters. Share it only with your family.",
+    "nameTooShort": "The family name needs at least 2 characters.",
+    "nameTooLong": "The family name can be 40 characters at most.",
+    "nameInvalid": "The family name can't contain \"/\".",
+    "passwordTooShort": "The family password needs at least 8 characters.",
+    "signOut": "Sign out",
+    "familyDeleted": "That family was deleted. Join or create another one.",
+    "removed": "You're no longer in that family. Join or create another one."
+  },
+  "list": {
+    "toBuy": "To buy",
+    "bought": "Bought",
+    "clear": "Clear",
+    "summary": "{{toBuy}} to buy",
+    "summaryOverdue": "{{toBuy}} to buy · {{overdue}} overdue",
+    "allDone": "Everything is bought",
+    "emptyTitle": "The list is empty",
+    "emptyBody": "Add the first thing the house needs.",
+    "addPlaceholder": "Add an item…",
+    "boughtBy": "Bought by {{name}}",
+    "deleted": "Removed \"{{name}}\"",
+    "overdue": "Overdue",
+    "clearTitle": "Clear bought items?",
+    "clearBody": "This removes {{n}} bought items for everyone.",
+    "openFamily": "Family and settings"
+  },
+  "addItem": {
+    "title": "New item",
+    "name": "What do you need?",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "due": "Needed by",
+    "add": "Add to list",
+    "added": "Added \"{{name}}\"",
+    "missingName": "Write what you need first."
+  },
+  "due": {
+    "none": "No rush",
+    "today": "Today",
+    "tomorrow": "Tomorrow",
+    "yesterday": "Yesterday",
+    "pick": "Pick a time"
+  },
+  "units": {
+    "pcs": "pcs",
+    "kg": "kg",
+    "g": "g",
+    "L": "L",
+    "mL": "mL",
+    "pack": "pack",
+    "box": "box"
+  },
+  "family": {
+    "title": "Family",
+    "members": "Members",
+    "memberCount_one": "{{n}} member",
+    "memberCount_other": "{{n}} members",
+    "creator": "Created the family",
+    "language": "Language",
+    "account": "Account",
+    "signedInAs": "Signed in as {{name}}",
+    "leave": "Leave family",
+    "leaveTitle": "Leave this family?",
+    "leaveBody": "You'll stop seeing its list. You can join again with the password.",
+    "delete": "Delete family",
+    "deleteTitle": "Delete this family?",
+    "deleteBody": "This deletes the family and its whole list for everyone. It can't be undone.",
+    "signOut": "Sign out",
+    "signOutTitle": "Sign out?",
+    "close": "Close"
+  },
+  "settings": {
+    "reopenTitle": "Almost done",
+    "reopenToApply": "Close and reopen the app to finish switching the language."
+  },
+  "push": {
+    "addedTitle": "New on the list",
+    "added": "{{name}} added {{item}}",
+    "boughtTitle": "Bought",
+    "bought": "{{name}} bought {{item}}",
+    "removedTitle": "Removed from the list",
+    "removed": "{{name}} removed {{item}}"
+  },
+  "errors": {
+    "wrongCredentials": "Wrong email or password.",
+    "emailInUse": "An account with this email already exists. Sign in instead.",
+    "invalidEmail": "That email address doesn't look right.",
+    "weakPassword": "Use at least 6 characters for your account password.",
+    "network": "No connection. Check your internet and try again.",
+    "tooManyRequests": "Too many tries. Wait a few minutes and try again.",
+    "permission": "You don't have access to that. Try signing in again.",
+    "familyNotFound": "No family has that name. Check the spelling.",
+    "familyNameTaken": "That family name is taken. Pick another, or join that family instead.",
+    "wrongPassword": "Wrong family password.",
+    "wrongPasswordTries_one": "Wrong family password. {{n}} try left before a 15-minute wait.",
+    "wrongPasswordTries_other": "Wrong family password. {{n}} tries left before a 15-minute wait.",
+    "wrongPasswordWait": "Wrong family password. Wait 15 minutes before trying again.",
+    "accountCooldown": "Too many wrong passwords. Try again at {{time}}.",
+    "familyBusy": "This family has had too many join attempts. Try again at {{time}}.",
+    "generic": "Something went wrong. Try again."
+  }
+}
