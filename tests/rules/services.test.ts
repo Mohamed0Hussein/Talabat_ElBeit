@@ -113,6 +113,31 @@ describe('createFamily and joinFamily', () => {
     await expect(joinFamily(dbAs(env, 'bob'), bob, input())).rejects.toMatchObject({ code: 'familyBusy' });
   });
 
+  it('says the family is busy even when the phone clock thinks the hour is over', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'families', familyId, 'meta', 'joinLimit'), {
+        windowStart: Timestamp.fromMillis(Date.now() - 10 * 60 * 1000),
+        count: 10,
+      });
+    });
+    const skewed = new Date(Date.now() + 2 * 60 * 60 * 1000);
+    await expect(joinFamily(dbAs(env, 'bob'), bob, input(), skewed)).rejects.toMatchObject({ code: 'familyBusy' });
+  });
+
+  it('says to wait when the phone clock thinks the 15 minutes are over but they are not', async () => {
+    const { familyId } = await createFamily(dbAs(env, 'alice'), alice, input());
+    await env.withSecurityRulesDisabled(async (ctx) => {
+      await setDoc(doc(ctx.firestore(), 'families', familyId, 'joinAttempts', 'bob'), {
+        proof: '0'.repeat(64),
+        count: 5,
+        at: Timestamp.fromMillis(Date.now() - 60 * 1000),
+      });
+    });
+    const skewed = new Date(Date.now() + 20 * 60 * 1000);
+    await expect(joinFamily(dbAs(env, 'bob'), bob, input(), skewed)).rejects.toMatchObject({ code: 'accountCooldown' });
+  });
+
   it('still joins when the phone clock is two hours ahead', async () => {
     await createFamily(dbAs(env, 'alice'), alice, input());
     const skewed = new Date(Date.now() + 2 * 60 * 60 * 1000);

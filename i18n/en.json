@@ -132,7 +132,9 @@
     "wrongPasswordWait": "Wrong family password. Wait 15 minutes before trying again.",
     "accountCooldown": "Too many wrong passwords. Try again at {{time}}.",
     "familyBusy": "This family has had too many join attempts. Try again at {{time}}.",
-    "generic": "Something went wrong. Try again."
+    "generic": "Something went wrong. Try again.",
+    "accountCooldownSoon": "Too many wrong passwords. Try again in a few minutes.",
+    "familyBusySoon": "This family has had too many join attempts. Try again in a few minutes."
   },
   "notFound": {
     "title": "This page doesn't exist.",

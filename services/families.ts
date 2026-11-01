@@ -12,7 +12,14 @@ import {
 } from 'firebase/firestore';
 import { AppError } from '@/lib/errors';
 import { normalizeFamilyName } from '@/lib/familyName';
-import { FAMILY_WINDOW_MS, accountCooldownUntil, familyBusyUntil, triesLeftBeforeWait } from '@/lib/joinLimits';
+import {
+  FAMILY_MAX_ATTEMPTS,
+  FAMILY_WINDOW_MS,
+  FREE_ATTEMPTS,
+  accountCooldownUntil,
+  familyBusyUntil,
+  triesLeftBeforeWait,
+} from '@/lib/joinLimits';
 import { passwordHashInput } from '@/lib/password';
 import type { Lang, Member } from '@/lib/types';
 import { sha256Hex } from './hash';
@@ -119,14 +126,21 @@ async function recordAttempt(db: Firestore, familyRef: DocumentReference, uid: s
       await batch.commit();
       return count;
     } catch (e) {
-      if (!isDenied(e) || tryNo >= 2) {
-        if (isDenied(e) && state.prev && state.prev.count >= 5) {
-          throw new AppError('accountCooldown', { until: accountCooldownUntil(state.prev) ?? undefined, triesLeft: 0 });
-        }
-        throw e;
-      }
+      if (!isDenied(e)) throw e;
+      if (tryNo >= 2) throw refusedAttempt(state);
     }
   }
+}
+
+/** The server kept refusing the attempt: say which limit it was, judged from the server's own timestamps. */
+function refusedAttempt(state: AttemptState): Error {
+  if (state.prev && state.prev.count >= FREE_ATTEMPTS) {
+    return new AppError('accountCooldown', { until: accountCooldownUntil(state.prev) ?? undefined, triesLeft: 0 });
+  }
+  if (state.limit.count >= FAMILY_MAX_ATTEMPTS) {
+    return new AppError('familyBusy', { until: new Date(state.limit.windowStart.getTime() + FAMILY_WINDOW_MS) });
+  }
+  return new Error('join attempt refused'); // shown as the generic message
 }
 
 async function isMemberAlready(memberRef: DocumentReference): Promise<boolean> {

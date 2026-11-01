@@ -20,11 +20,23 @@ it('says to wait when no free tries are left', () => {
 });
 
 it('says when to try again after a lockout', () => {
-  expect(errorMessage(new AppError('accountCooldown', { until: at }), 'en')).toMatch(/Try again at 2:32\sPM\.$/);
-  expect(errorMessage(new AppError('familyBusy', { until: at }), 'ar')).toContain('٢:٣٢');
+  const before = new Date(2026, 10, 1, 14, 0);
+  expect(errorMessage(new AppError('accountCooldown', { until: at }), 'en', before)).toMatch(/Try again at 2:32\sPM\.$/);
+  expect(errorMessage(new AppError('familyBusy', { until: at }), 'ar', before)).toContain('٢:٣٢');
 });
 
 it('uses the mapped message for other errors', () => {
   expect(errorMessage({ code: 'auth/invalid-credential' }, 'en')).toBe('Wrong email or password.');
   expect(errorMessage(new Error('boom'), 'ar')).toBe('حصلت مشكلة. جرب تاني.');
+});
+
+it('says "in a few minutes" when the lockout time has already passed on this phone', () => {
+  const later = new Date(2026, 10, 1, 15, 0);
+  expect(errorMessage(new AppError('accountCooldown', { until: at }), 'en', later)).toBe(
+    'Too many wrong passwords. Try again in a few minutes.',
+  );
+  expect(errorMessage(new AppError('familyBusy', { until: at }), 'en', later)).toBe(
+    'This family has had too many join attempts. Try again in a few minutes.',
+  );
+  expect(errorMessage(new AppError('familyBusy', { until: at }), 'ar', later)).toContain('كمان كام دقيقة');
 });
