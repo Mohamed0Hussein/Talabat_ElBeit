@@ -1,0 +1,251 @@
+rules_version = '2';
+
+// Talabat ElBeit security rules.
+//
+// Families are private to their members. Joining needs the family password,
+// checked here on the server. Every guess is first recorded in
+// joinAttempts/{uid} and counted in meta/joinLimit, and both are rate-limited:
+//   - per account: 5 free attempts, then one per 15 minutes, then one per hour after 10;
+//   - per family: at most 10 attempts per hour, from all accounts together.
+// lib/joinLimits.ts mirrors these numbers for the app's messages.
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ---------- helpers ----------
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+
+    function familyPath(fid) {
+      return /databases/$(database)/documents/families/$(fid);
+    }
+
+    function memberPath(fid, uid) {
+      return /databases/$(database)/documents/families/$(fid)/members/$(uid);
+    }
+
+    function secretPath(fid) {
+      return /databases/$(database)/documents/families/$(fid)/secret/password;
+    }
+
+    function limitPath(fid) {
+      return /databases/$(database)/documents/families/$(fid)/meta/joinLimit;
+    }
+
+    function attemptPath(fid, uid) {
+      return /databases/$(database)/documents/families/$(fid)/joinAttempts/$(uid);
+    }
+
+    function isMember(fid) {
+      return signedIn() && exists(memberPath(fid, request.auth.uid));
+    }
+
+    function isCreator(fid) {
+      return signedIn() && get(familyPath(fid)).data.creatorId == request.auth.uid;
+    }
+
+    // True when the caller creates family `fid` in this same batch.
+    function creatingFamily(fid) {
+      return signedIn()
+        && !exists(familyPath(fid))
+        && existsAfter(familyPath(fid))
+        && getAfter(familyPath(fid)).data.creatorId == request.auth.uid;
+    }
+
+    function isText(s, max) {
+      return s is string && s.size() > 0 && s.size() <= max;
+    }
+
+    function isLang(l) {
+      return l in ['en', 'ar'];
+    }
+
+    // ---------- users ----------
+
+    match /users/{uid} {
+      allow read: if isSelf(uid);
+      allow create, update: if isSelf(uid)
+        && request.resource.data.keys().hasOnly(['displayName', 'familyId', 'language', 'updatedAt'])
+        && request.resource.data.displayName is string
+        && request.resource.data.displayName.size() <= 60
+        && (request.resource.data.familyId == null || request.resource.data.familyId is string)
+        && isLang(request.resource.data.language);
+      allow delete: if false;
+    }
+
+    // ---------- family name lookup ----------
+
+    match /familyNames/{nameKey} {
+      allow get: if signedIn();
+      allow list: if false;
+      allow create: if request.resource.data.keys().hasOnly(['familyId'])
+        && creatingFamily(request.resource.data.familyId)
+        && getAfter(familyPath(request.resource.data.familyId)).data.nameKey == nameKey;
+      allow update: if false;
+      allow delete: if signedIn()
+        && get(familyPath(resource.data.familyId)).data.creatorId == request.auth.uid;
+    }
+
+    // ---------- families ----------
+
+    match /families/{fid} {
+      allow get: if isMember(fid);
+      allow list: if false;
+      allow create: if signedIn()
+        && request.resource.data.keys().hasOnly(['name', 'nameKey', 'creatorId', 'createdAt'])
+        && request.resource.data.creatorId == request.auth.uid
+        && isText(request.resource.data.name, 60)
+        && isText(request.resource.data.nameKey, 60)
+        && request.resource.data.createdAt == request.time
+        && getAfter(/databases/$(database)/documents/familyNames/$(request.resource.data.nameKey)).data.familyId == fid
+        && existsAfter(secretPath(fid))
+        && existsAfter(limitPath(fid))
+        && existsAfter(memberPath(fid, request.auth.uid));
+      allow update: if false;
+      allow delete: if signedIn() && resource.data.creatorId == request.auth.uid;
+
+      // The password hash. Never readable; rules compare against it.
+      match /secret/{docId} {
+        allow read: if false;
+        allow create: if docId == 'password'
+          && creatingFamily(fid)
+          && request.resource.data.keys().hasOnly(['hash'])
+          && request.resource.data.hash is string
+          && request.resource.data.hash.size() == 64;
+        allow update: if false;
+        allow delete: if isCreator(fid);
+      }
+
+      // Per-family attempt counter: { windowStart, count }.
+      match /meta/{docId} {
+        function limitStepOk() {
+          let before = resource.data;
+          let after = request.resource.data;
+          let windowEnd = before.windowStart + duration.value(1, 'h');
+          return (request.time < windowEnd
+              && after.windowStart == before.windowStart
+              && after.count == before.count + 1
+              && after.count <= 10)
+            || (request.time >= windowEnd
+              && after.windowStart == request.time
+              && after.count == 1);
+        }
+
+        allow get: if signedIn() && docId == 'joinLimit';
+        allow list: if false;
+        allow create: if docId == 'joinLimit'
+          && creatingFamily(fid)
+          && request.resource.data.keys().hasOnly(['windowStart', 'count'])
+          && request.resource.data.windowStart == request.time
+          && request.resource.data.count == 0;
+        allow update: if docId == 'joinLimit'
+          && signedIn()
+          && request.resource.data.keys().hasOnly(['windowStart', 'count'])
+          && limitStepOk()
+          && getAfter(attemptPath(fid, request.auth.uid)).data.at == request.time;
+        allow delete: if isCreator(fid);
+      }
+
+      // One record per account: its latest guess (hashed), how many guesses, and when.
+      match /joinAttempts/{uid} {
+        function attemptOk(n) {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['proof', 'count', 'at'])
+            && d.proof is string
+            && d.proof.size() == 64
+            && d.count == n
+            && d.at == request.time;
+        }
+
+        function cooldownOk(prev) {
+          return prev.count < 5
+            || (prev.count < 10 && request.time >= prev.at + duration.value(15, 'm'))
+            || request.time >= prev.at + duration.value(60, 'm');
+        }
+
+        // The family counter must change in the same batch (its own rule checks how).
+        function countedAgainstFamily() {
+          let before = get(limitPath(fid)).data;
+          let after = getAfter(limitPath(fid)).data;
+          return after.count != before.count || after.windowStart != before.windowStart;
+        }
+
+        allow get: if isSelf(uid);
+        allow list: if false;
+        allow create: if isSelf(uid)
+          && exists(familyPath(fid))
+          && attemptOk(1)
+          && countedAgainstFamily();
+        allow update: if isSelf(uid)
+          && exists(familyPath(fid))
+          && attemptOk(resource.data.count + 1)
+          && cooldownOk(resource.data)
+          && countedAgainstFamily();
+        allow delete: if false;
+      }
+
+      match /members/{uid} {
+        function memberOk() {
+          let d = request.resource.data;
+          return d.keys().hasOnly(['displayName', 'expoPushToken', 'language', 'joinedAt'])
+            && d.displayName is string
+            && d.displayName.size() <= 60
+            && d.expoPushToken is string
+            && d.expoPushToken.size() <= 200
+            && isLang(d.language);
+        }
+
+        function passwordChecked() {
+          return exists(familyPath(fid))
+            && get(attemptPath(fid, uid)).data.proof == get(secretPath(fid)).data.hash;
+        }
+
+        allow read: if isMember(fid);
+        allow create: if isSelf(uid)
+          && memberOk()
+          && request.resource.data.joinedAt == request.time
+          && (creatingFamily(fid) || passwordChecked());
+        allow update: if isSelf(uid)
+          && memberOk()
+          && request.resource.data.diff(resource.data).affectedKeys()
+            .hasOnly(['displayName', 'expoPushToken', 'language']);
+        allow delete: if isSelf(uid) || isCreator(fid);
+      }
+
+      match /items/{itemId} {
+        function itemOk(d) {
+          return d.keys().hasOnly(['name', 'quantity', 'unit', 'dueAt', 'bought', 'boughtBy',
+                                   'addedBy', 'addedById', 'createdAt'])
+            && isText(d.name, 80)
+            && d.quantity is number
+            && d.quantity > 0
+            && d.quantity <= 1000
+            && d.unit in ['pcs', 'kg', 'g', 'L', 'mL', 'pack', 'box']
+            && (d.dueAt == null || d.dueAt is timestamp)
+            && d.bought is bool
+            && (d.boughtBy == null || (d.boughtBy is string && d.boughtBy.size() <= 60))
+            && d.addedBy is string
+            && d.addedBy.size() <= 60;
+        }
+
+        allow read: if isMember(fid);
+        allow create: if isMember(fid)
+          && itemOk(request.resource.data)
+          && request.resource.data.addedById == request.auth.uid
+          && request.resource.data.createdAt == request.time
+          && request.resource.data.bought == false
+          && request.resource.data.boughtBy == null;
+        allow update: if isMember(fid)
+          && itemOk(request.resource.data)
+          && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['bought', 'boughtBy']);
+        allow delete: if isMember(fid);
+      }
+    }
+  }
+}
