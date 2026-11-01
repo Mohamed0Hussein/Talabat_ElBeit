@@ -24,6 +24,7 @@ import { dueStatus, splitItems } from '@/lib/items';
 import type { Item } from '@/lib/types';
 import { db } from '@/services/firebase';
 import { addItem, clearBought, deleteItem, setBought } from '@/services/items';
+import { notifyMembers } from '@/services/push';
 import { useTheme } from '@/theme/ThemeProvider';
 
 type Toast = { message: string; undo?: boolean };
@@ -48,12 +49,26 @@ export default function ListScreen() {
 
   const showError = useCallback((e: unknown) => setToast({ message: errorMessage(e, lang) }), [lang]);
 
+  // Latest members and sender for callbacks that run later (the delayed delete).
+  const latest = useRef({ members, who });
+  latest.current = { members, who };
+  const notify = useCallback(
+    (kind: 'added' | 'bought' | 'removed', itemName: string) => {
+      if (familyId) notifyMembers(latest.current.members, latest.current.who, kind, itemName, familyId);
+    },
+    [familyId],
+  );
+
   const commitPendingDelete = useCallback(() => {
     const item = pendingRef.current;
     pendingRef.current = null;
     setPendingDelete(null);
-    if (item && familyId) deleteItem(db, familyId, item.id).catch(showError);
-  }, [familyId, showError]);
+    if (item && familyId) {
+      deleteItem(db, familyId, item.id)
+        .then(() => notify('removed', item.name))
+        .catch(showError);
+    }
+  }, [familyId, showError, notify]);
 
   // Leaving the screen (or the app closing it) finishes a pending delete.
   useEffect(() => () => commitPendingDelete(), [commitPendingDelete]);
@@ -79,13 +94,18 @@ export default function ListScreen() {
   const onToggle = (item: Item) => {
     if (!familyId) return;
     if (Platform.OS !== 'web') Haptics.selectionAsync().catch(() => undefined);
-    setBought(db, familyId, item.id, !item.bought, who.displayName).catch(showError);
+    setBought(db, familyId, item.id, !item.bought, who.displayName)
+      .then(() => {
+        if (!item.bought) notify('bought', item.name);
+      })
+      .catch(showError);
   };
 
   const onAdd = async (input: NewItem) => {
     if (!familyId) return;
     await addItem(db, familyId, who, input);
     setToast({ message: t('addItem.added', { name: input.name }) });
+    notify('added', input.name);
   };
 
   const visible = items.filter((i) => i.id !== pendingDelete?.id);

@@ -1,9 +1,11 @@
 import { type User, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, onSnapshot } from 'firebase/firestore';
-import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { displayNameOf } from '@/lib/familyName';
-import { clearUserFamily } from '@/services/families';
+import { useLanguage } from '@/i18n/LanguageProvider';
+import { clearUserFamily, updateMyMember } from '@/services/families';
 import { auth, db } from '@/services/firebase';
+import { registerForPush } from '@/services/push';
 
 export type SessionStatus = 'loading' | 'signedOut' | 'needsFamily' | 'ready';
 export type SessionNotice = 'familyDeleted' | 'removed' | null;
@@ -26,6 +28,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [familyId, setFamilyId] = useState<string | null | undefined>(undefined);
   const [membership, setMembership] = useState<'checking' | 'ok' | 'gone'>('checking');
   const [notice, setNotice] = useState<SessionNotice>(null);
+  const memberRef = useRef<{ expoPushToken?: string; language?: string } | null>(null);
+  const { lang } = useLanguage();
 
   useEffect(() => onAuthStateChanged(auth, setUser), []);
 
@@ -62,13 +66,34 @@ export function SessionProvider({ children }: { children: ReactNode }) {
     };
     return onSnapshot(
       doc(db, 'families', familyId, 'members', uid),
-      (snap) => (snap.exists() ? setMembership('ok') : gone()),
+      (snap) => {
+        if (!snap.exists()) return gone();
+        memberRef.current = snap.data();
+        setMembership('ok');
+      },
       (e) => {
         // Non-members can't read member records, so "denied" also means gone. Other errors (offline) are retried.
         if (isDenied(e)) gone();
       },
     );
   }, [uid, familyId]);
+
+  // Once in a family: keep this phone's push token and the chosen language on our member record.
+  useEffect(() => {
+    if (!uid || !familyId || membership !== 'ok') return;
+    let cancelled = false;
+    (async () => {
+      const token = await registerForPush();
+      const current = memberRef.current ?? {};
+      const patch: { expoPushToken?: string; language?: 'en' | 'ar' } = {};
+      if (token && token !== current.expoPushToken) patch.expoPushToken = token;
+      if (lang !== current.language) patch.language = lang;
+      if (!cancelled && Object.keys(patch).length) await updateMyMember(db, familyId, uid, patch).catch(() => undefined);
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [uid, familyId, membership, lang]);
 
   const clearNotice = useCallback(() => setNotice(null), []);
 
