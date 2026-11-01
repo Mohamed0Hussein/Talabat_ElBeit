@@ -1,0 +1,399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Talabat ElBeit Redesign Directions</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Aref+Ruqaa:wght@400;700&family=Cairo:wght@400;600;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  /* Page chrome stays neutral so each phone's palette reads on its own.
+     Layout: stacked direction sections, copy column beside two phones. */
+  --bg: #F3F3EF;
+  --panel: #FFFFFF;
+  --ink: #1B1E22;
+  --muted: #5B6067;
+  --line: #DDDDD6;
+  --accent: #22408F;
+  --font: "IBM Plex Sans Arabic", "Segoe UI", system-ui, sans-serif;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #121417; --panel: #1A1D21; --ink: #E9EBEE; --muted: #A3A9B1; --line: #2B2F35; --accent: #A9BDFF;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #121417; --panel: #1A1D21; --ink: #E9EBEE; --muted: #A3A9B1; --line: #2B2F35; --accent: #A9BDFF;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 40px 20px 72px; display: grid; gap: 48px; }
+h1, h2, h3 { text-wrap: balance; }
+.intro h1 { font-size: clamp(28px, 4.2vw, 40px); line-height: 1.15; margin: 0 0 14px; }
+.intro p { max-width: 65ch; color: var(--muted); margin: 0 0 10px; line-height: 1.6; font-size: 16px; }
+.intro p strong { color: var(--ink); font-weight: 600; }
+
+.direction { display: grid; grid-template-columns: minmax(260px, 1fr) auto; gap: 32px; align-items: start; padding-top: 36px; border-top: 1px solid var(--line); }
+@media (max-width: 960px) { .direction { grid-template-columns: 1fr; } }
+.copy { display: grid; gap: 18px; max-width: 56ch; }
+.copy h2 { font-size: 28px; margin: 0; line-height: 1.2; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+.copy h2 .num { color: var(--muted); font-weight: 500; }
+.pick { font-size: 12px; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: var(--accent); border: 1.5px solid var(--accent); border-radius: 999px; padding: 3px 10px; }
+.copy p { margin: 0; line-height: 1.6; }
+.copy .why { color: var(--muted); }
+.label { font-size: 12px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); margin: 0 0 8px; }
+.swatches { display: grid; gap: 10px; }
+.swrow { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.swrow span.mode { width: 44px; font-size: 13px; color: var(--muted); }
+.sw { width: 34px; height: 34px; border-radius: 9px; border: 1px solid var(--line); }
+.typesample { display: grid; gap: 4px; padding: 14px 16px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; }
+.typesample .big { font-size: 26px; line-height: 1.3; }
+.typesample .small { font-size: 14px; color: var(--muted); }
+.pc { display: grid; grid-template-columns: auto 1fr; gap: 6px 14px; margin: 0; line-height: 1.5; }
+.pc dt { font-weight: 600; }
+.pc dd { margin: 0; color: var(--muted); }
+
+.phones { display: flex; gap: 22px; flex-wrap: wrap; justify-content: center; }
+figure { margin: 0; display: grid; gap: 10px; justify-items: center; }
+figcaption { font-size: 13px; color: var(--muted); }
+
+.common { display: grid; gap: 20px; padding-top: 36px; border-top: 1px solid var(--line); }
+.common h2 { font-size: 28px; margin: 0; }
+.common > p { margin: 0; color: var(--muted); max-width: 65ch; line-height: 1.6; }
+.changes { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.change { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: grid; gap: 6px; align-content: start; }
+.change h3 { margin: 0; font-size: 16px; }
+.change p { margin: 0; color: var(--muted); line-height: 1.55; font-size: 14.5px; }
+.ask { background: var(--panel); border: 1px solid var(--line); border-inline-start: 4px solid var(--accent); border-radius: 12px; padding: 18px 20px; line-height: 1.6; max-width: 70ch; }
+.ask p { margin: 0; }
+
+/* ---------- Phone frame ---------- */
+.phone { width: 280px; height: 590px; border-radius: 40px; padding: 9px; background: #0D0E10; box-shadow: 0 20px 40px -22px rgba(0,0,0,.45); }
+.screen { position: relative; height: 100%; border-radius: 31px; overflow: hidden; background: var(--p-bg); color: var(--p-text); font-family: var(--p-body); display: flex; flex-direction: column; font-size: 14px; line-height: 1.35; }
+.sbar { display: flex; justify-content: space-between; align-items: center; padding: 11px 22px 4px; font-size: 12px; font-weight: 600; direction: ltr; font-family: "IBM Plex Sans Arabic", system-ui, sans-serif; }
+.sbar .icons { display: flex; gap: 5px; align-items: center; }
+.sbar .icons i { display: block; background: currentColor; border-radius: 2px; }
+.appbar { display: flex; align-items: center; gap: 10px; padding: 8px 16px 2px; }
+.appbar .title { flex: 1; min-width: 0; font-family: var(--p-display); font-size: 23px; font-weight: 700; line-height: 1.25; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.avatars { display: flex; align-items: center; }
+.av { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 10px; font-weight: 700; color: #1B1E22; border: 2px solid var(--p-bg); margin-inline-start: -7px; font-family: var(--p-body); }
+.av:first-child { margin-inline-start: 0; }
+.chev { width: 14px; height: 14px; margin-inline-start: 4px; color: var(--p-muted); }
+.summary { padding: 0 16px 10px; color: var(--p-muted); font-size: 12.5px; display: grid; gap: 6px; }
+.subrow { display: flex; align-items: center; gap: 10px; }
+.stext { flex: 1; min-width: 0; }
+.list { flex: 1; position: relative; overflow: hidden; }
+.sec { display: flex; justify-content: space-between; align-items: baseline; padding: 12px 16px 4px; font-weight: 700; font-size: 14px; }
+.sec .clear { font-size: 12px; font-weight: 600; color: var(--p-primary); font-family: var(--p-body); }
+.row { display: flex; align-items: center; gap: 12px; padding: 10px 16px; }
+.cb { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--p-primary); display: grid; place-items: center; }
+.cb.on { background: var(--p-primary); color: var(--p-on-primary); }
+.cb svg { width: 13px; height: 13px; }
+.main { flex: 1; min-width: 0; }
+.name { font-weight: 600; font-size: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.meta { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; font-size: 11.5px; color: var(--p-muted); margin-top: 2px; }
+.meta .dot { opacity: .6; }
+.due { padding: 1px 6px; border-radius: 6px; }
+.due.today { background: var(--p-hi); color: var(--p-hi-text); font-weight: 600; }
+.due.overdue { color: var(--p-danger); font-weight: 700; }
+.qty { flex: none; font-weight: 600; font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 13.5px; }
+.row.done .name { text-decoration: line-through; color: var(--p-muted); font-weight: 500; }
+.row.done .qty { color: var(--p-muted); }
+.addbar { display: flex; gap: 8px; padding: 10px 12px 16px; border-top: 1px solid var(--p-line); background: var(--p-surface); }
+.addbar .in { flex: 1; height: 40px; border-radius: 10px; background: var(--p-field); display: flex; align-items: center; gap: 8px; padding: 0 12px; color: var(--p-muted); }
+.addbar .in svg { width: 16px; height: 16px; flex: none; }
+.plus { flex: none; width: 40px; height: 40px; border-radius: 10px; background: var(--p-primary); color: var(--p-on-primary); display: grid; place-items: center; }
+.plus svg { width: 20px; height: 20px; }
+
+.scrim { position: absolute; inset: 0; background: rgba(0,0,0,.5); }
+.sheet { position: absolute; inset-inline: 0; bottom: 0; background: var(--p-surface); border-radius: 22px 22px 0 0; padding: 8px 16px 18px; display: grid; gap: 12px; }
+.handle { width: 38px; height: 4px; border-radius: 2px; background: var(--p-line); margin: 0 auto 2px; }
+.sheet h3 { margin: 0; font-family: var(--p-display); font-size: 20px; font-weight: 700; }
+.fieldrow { display: flex; gap: 8px; }
+.field { flex: 1; height: 42px; border-radius: 10px; background: var(--p-field); display: flex; align-items: center; padding: 0 12px; font-weight: 600; border: 1.5px solid var(--p-primary); }
+.stepper { flex: none; display: flex; align-items: center; height: 42px; border-radius: 10px; background: var(--p-field); }
+.stepper span { width: 30px; display: grid; place-items: center; font-weight: 700; }
+.stepper span svg { width: 14px; height: 14px; }
+.stepper b { min-width: 18px; text-align: center; font-variant-numeric: tabular-nums; }
+.lbl { font-size: 11.5px; color: var(--p-muted); margin-bottom: 6px; font-weight: 600; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { padding: 4px 10px; border-radius: 999px; border: 1px solid var(--p-line); font-size: 12px; }
+.chip.on { background: var(--p-primary); color: var(--p-on-primary); border-color: var(--p-primary); font-weight: 600; }
+.btn { height: 44px; border-radius: 12px; background: var(--p-primary); color: var(--p-on-primary); display: grid; place-items: center; font-weight: 700; margin-top: 2px; }
+
+/* Arabic never gets letter-spacing: it breaks the joins between letters. */
+.screen[dir="rtl"] * { letter-spacing: 0 !important; }
+
+/* ---------- Direction 1: Daftar (fridge notebook) ---------- */
+.d1.light { --p-bg:#F7F6F1; --p-surface:#FFFFFF; --p-field:#EEEDE6; --p-text:#1C2A52; --p-muted:#5E6577; --p-line:#D3DCEB; --p-primary:#22408F; --p-on-primary:#FFFFFF; --p-hi:#FFE47A; --p-hi-text:#1C2A52; --p-danger:#C2362F; --p-margin:#E36A62;
+  --p-display:"Aref Ruqaa", "IBM Plex Sans Arabic", serif; --p-body:"IBM Plex Sans Arabic", system-ui, sans-serif; }
+.d1.dark { --p-bg:#141821; --p-surface:#1B2130; --p-field:#232A3B; --p-text:#DCE4FF; --p-muted:#8E98B3; --p-line:#29314A; --p-primary:#9DB5FF; --p-on-primary:#121726; --p-hi:#6A5A14; --p-hi-text:#FFF1B8; --p-danger:#FF7A70; --p-margin:#A24B45;
+  --p-display:"Aref Ruqaa", "IBM Plex Sans Arabic", serif; --p-body:"IBM Plex Sans Arabic", system-ui, sans-serif; }
+.d1 .title { font-size: 27px; color: var(--p-primary); }
+.d1 .list::before { content: ""; position: absolute; top: 0; bottom: 0; inset-inline-start: 44px; width: 1.5px; background: var(--p-margin); opacity: .75; }
+.d1 .row { border-bottom: 1px solid var(--p-line); padding: 9px 16px; }
+.d1 .sec { font-family: var(--p-display); font-size: 19px; font-weight: 700; color: var(--p-primary); padding-inline-start: 56px; padding-top: 14px; border-bottom: 1px solid var(--p-line); }
+.d1 .cb { border-width: 1.6px; border-radius: 50% 44% 54% 47% / 47% 54% 44% 50%; }
+.d1 .main { padding-inline-start: 8px; }
+.d1 .due.today { background: linear-gradient(transparent 42%, var(--p-hi) 42%); color: var(--p-text); border-radius: 0; padding: 0 3px; }
+.d1 .row.done .name { text-decoration-thickness: 2px; text-decoration-color: var(--p-primary); }
+.d1 .av { background: var(--p-bg); color: var(--p-primary); border: 1.5px solid var(--p-primary); }
+.d1 .addbar { background: var(--p-bg); }
+.d1 .addbar .in { background: transparent; border-radius: 0; border-bottom: 1.5px solid var(--p-primary); padding: 0 4px; }
+.d1 .sheet { background: var(--p-bg); }
+.d1 .sheet h3 { font-size: 24px; color: var(--p-primary); }
+.d1 .field { background: transparent; border: 0; border-bottom: 1.5px solid var(--p-primary); border-radius: 0; padding: 0 4px; }
+.d1 .stepper { background: transparent; border: 1.5px solid var(--p-line); }
+
+/* ---------- Direction 2: Souq (produce stand) ---------- */
+.d2.light { --p-bg:#EFF4EC; --p-surface:#FFFFFF; --p-field:#EAF0E6; --p-text:#13251A; --p-muted:#5A6B60; --p-line:#D9E3D4; --p-primary:#1E7A46; --p-on-primary:#FFFFFF; --p-hi:#F6C431; --p-hi-text:#3D2E00; --p-danger:#D23A26; --p-tint:#DDEFE3;
+  --p-display:"Readex Pro", system-ui, sans-serif; --p-body:"Readex Pro", system-ui, sans-serif; }
+.d2.dark { --p-bg:#0E1712; --p-surface:#17241C; --p-field:#1F2E25; --p-text:#E5EFE8; --p-muted:#93A699; --p-line:#26372D; --p-primary:#5CC98A; --p-on-primary:#0B1A11; --p-hi:#F5C542; --p-hi-text:#2B2000; --p-danger:#FF7262; --p-tint:#1C3A28;
+  --p-display:"Readex Pro", system-ui, sans-serif; --p-body:"Readex Pro", system-ui, sans-serif; }
+.d2 .title { font-size: 22px; }
+.d2 .progress { height: 8px; border-radius: 999px; background: var(--p-tint); overflow: hidden; }
+.d2 .progress i { display: block; height: 100%; width: 33%; background: var(--p-primary); border-radius: 999px; }
+.d2 .list { padding: 0 12px; }
+.d2 .sec { padding: 8px 4px 6px; font-weight: 600; }
+.d2 .row { background: var(--p-surface); border-radius: 16px; margin-bottom: 7px; padding: 9px 12px; box-shadow: 0 1px 2px rgba(0,0,0,.06); }
+.d2 .cb { width: 26px; height: 26px; }
+.d2 .qty { background: var(--p-tint); color: var(--p-primary); padding: 4px 8px; border-radius: 8px; font-size: 12.5px; }
+.d2 .row.done { background: transparent; box-shadow: none; }
+.d2 .row.done .qty { background: transparent; }
+.d2 .due { border-radius: 999px; }
+.d2 .due.overdue { background: color-mix(in srgb, var(--p-danger) 15%, transparent); padding: 1px 7px; }
+.d2 .addbar { border-top: 0; background: var(--p-bg); }
+.d2 .addbar .in { border-radius: 999px; background: var(--p-surface); box-shadow: 0 1px 2px rgba(0,0,0,.08); }
+.d2 .plus { border-radius: 50%; }
+.d2 .chip, .d2 .field, .d2 .stepper, .d2 .btn { border-radius: 999px; }
+
+/* ---------- Direction 3: Mashrabiya (Nile tile) ---------- */
+.d3.light { --p-bg:#F2F5F6; --p-surface:#FFFFFF; --p-field:#E9EEF0; --p-text:#0F232A; --p-muted:#56676E; --p-line:#DCE3E6; --p-primary:#0B5E6B; --p-on-primary:#FFFFFF; --p-accent:#E39B2D; --p-on-accent:#2A1A00; --p-hi:#FBE7C4; --p-hi-text:#714500; --p-danger:#C2412B; --p-band:#0B5E6B;
+  --p-display:"Cairo", system-ui, sans-serif; --p-body:"Cairo", system-ui, sans-serif; }
+.d3.dark { --p-bg:#08171B; --p-surface:#0F242A; --p-field:#163038; --p-text:#E3EFF1; --p-muted:#8FA7AE; --p-line:#1C363E; --p-primary:#4FBFCC; --p-on-primary:#04252B; --p-accent:#F0B457; --p-on-accent:#2A1A00; --p-hi:#3F2E0E; --p-hi-text:#F7CB7E; --p-danger:#FF7E66; --p-band:#0D3B43;
+  --p-display:"Cairo", system-ui, sans-serif; --p-body:"Cairo", system-ui, sans-serif; }
+.d3 .band { color: #FFFFFF; background-color: var(--p-band);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='34' height='34' viewBox='0 0 34 34'%3E%3Cg fill='none' stroke='white' stroke-opacity='0.17' stroke-width='1'%3E%3Crect x='9' y='9' width='16' height='16'/%3E%3Crect x='9' y='9' width='16' height='16' transform='rotate(45 17 17)'/%3E%3Cpath d='M0 17H3.7M30.3 17H34M17 0V3.7M17 30.3V34'/%3E%3C/g%3E%3C/svg%3E");
+  padding-bottom: 4px; }
+.d3 .band .title { font-weight: 800; font-size: 24px; }
+.d3 .band .summary { color: rgba(255,255,255,.82); }
+.d3 .band .chev { color: rgba(255,255,255,.8); }
+.d3 .av { border-color: var(--p-band); }
+.d3 .sec { font-size: 11.5px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--p-muted); padding-top: 14px; }
+.d3 .row { border-bottom: 1px solid var(--p-line); padding: 8px 16px; }
+.d3 .cb { border-radius: 6px; }
+.d3 .qty { color: var(--p-primary); font-weight: 700; }
+.d3 .due.today { border-radius: 4px; }
+.d3 .due.overdue { background: var(--p-danger); color: #FFFFFF; border-radius: 4px; padding: 1px 6px; font-weight: 600; }
+.d3 .plus, .d3 .btn { background: var(--p-accent); color: var(--p-on-accent); }
+.d3 .plus { border-radius: 12px; }
+.d3 .chip.on { background: var(--p-primary); }
+</style>
+</head>
+<body>
+<main class="wrap">
+
+  <section class="intro">
+    <h1>Talabat ElBeit: three design directions</h1>
+    <p>All three use <strong>the same new layout</strong>. Only the look changes: colors, type and shapes. Each comes in light and dark, and each works in Arabic, right to left.</p>
+    <p>Left phone: the shopping list in English, light theme. Right phone: adding an item in Arabic, dark theme. The changes shared by all three are listed at the bottom.</p>
+  </section>
+
+  <section class="direction" id="daftar">
+    <div class="copy">
+      <h2><span class="num">1</span> Daftar, the fridge notebook <span class="pick">My pick</span></h2>
+      <p>The list looks like the paper list on the fridge: ruled lines, blue ballpoint ink, a red margin line, and the family name in Ruqaa, the script most Egyptians handwrite in. Rows are lines, not cards, so a long list stays calm. "Due today" gets a highlighter stroke.</p>
+      <p class="why">Why I'd pick it: it's the most personal of the three, it fits what the app replaces, and lines take less height than cards, so more items fit on screen. The margin line moves to the right side in Arabic on its own.</p>
+      <div class="swatches" aria-label="Daftar palette">
+        <div class="swrow"><span class="mode">Light</span><span class="sw" style="background:#F7F6F1"></span><span class="sw" style="background:#22408F"></span><span class="sw" style="background:#E36A62"></span><span class="sw" style="background:#FFE47A"></span><span class="sw" style="background:#D3DCEB"></span></div>
+        <div class="swrow"><span class="mode">Dark</span><span class="sw" style="background:#141821"></span><span class="sw" style="background:#9DB5FF"></span><span class="sw" style="background:#A24B45"></span><span class="sw" style="background:#6A5A14"></span><span class="sw" style="background:#29314A"></span></div>
+      </div>
+      <div class="typesample">
+        <span class="big" style="font-family:'Aref Ruqaa',serif;font-weight:700">عيلة حسين · Hussein Family</span>
+        <span class="small" style="font-family:'IBM Plex Sans Arabic',sans-serif">Aref Ruqaa for the family name and headings, IBM Plex Sans Arabic for everything else</span>
+      </div>
+      <dl class="pc"><dt>Works well</dt><dd>Feels familiar right away. Dense, readable long lists.</dd><dt>Watch out</dt><dd>Ruqaa is decorative, so it's limited to the family name and section titles.</dd></dl>
+    </div>
+    <div class="phones">
+      <figure><div class="phone" data-d="d1" data-lang="en" data-t="light" data-kind="list"></div><figcaption>Shopping list · English · light</figcaption></figure>
+      <figure><div class="phone" data-d="d1" data-lang="ar" data-t="dark" data-kind="sheet"></div><figcaption>Adding an item · Arabic · dark</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="direction" id="souq">
+    <div class="copy">
+      <h2><span class="num">2</span> Souq, the produce stand</h2>
+      <p>Leaf green, citrus yellow and tomato red, taken from a vegetable stall. Each item is a rounded card with its quantity in a tinted tag. A basket bar at the top fills up as things get bought.</p>
+      <div class="swatches" aria-label="Souq palette">
+        <div class="swrow"><span class="mode">Light</span><span class="sw" style="background:#EFF4EC"></span><span class="sw" style="background:#1E7A46"></span><span class="sw" style="background:#F6C431"></span><span class="sw" style="background:#D23A26"></span><span class="sw" style="background:#DDEFE3"></span></div>
+        <div class="swrow"><span class="mode">Dark</span><span class="sw" style="background:#0E1712"></span><span class="sw" style="background:#5CC98A"></span><span class="sw" style="background:#F5C542"></span><span class="sw" style="background:#FF7262"></span><span class="sw" style="background:#1C3A28"></span></div>
+      </div>
+      <div class="typesample">
+        <span class="big" style="font-family:'Readex Pro',sans-serif;font-weight:700">عيلة حسين · Hussein Family</span>
+        <span class="small" style="font-family:'Readex Pro',sans-serif">Readex Pro for everything: one family that covers Arabic and Latin</span>
+      </div>
+      <dl class="pc"><dt>Works well</dt><dd>The friendliest, most app-like look. Status is easiest to read at a glance.</dd><dt>Watch out</dt><dd>Cards take more height, so fewer items fit on one screen.</dd></dl>
+    </div>
+    <div class="phones">
+      <figure><div class="phone" data-d="d2" data-lang="en" data-t="light" data-kind="list"></div><figcaption>Shopping list · English · light</figcaption></figure>
+      <figure><div class="phone" data-d="d2" data-lang="ar" data-t="dark" data-kind="sheet"></div><figcaption>Adding an item · Arabic · dark</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="direction" id="mashrabiya">
+    <div class="copy">
+      <h2><span class="num">3</span> Mashrabiya, the Nile tile</h2>
+      <p>A teal header band with a faint mashrabiya star pattern, saffron for the add buttons, and a flat list with dividers. The boldest look of the three, and the one most likely to read as a brand.</p>
+      <div class="swatches" aria-label="Mashrabiya palette">
+        <div class="swrow"><span class="mode">Light</span><span class="sw" style="background:#F2F5F6"></span><span class="sw" style="background:#0B5E6B"></span><span class="sw" style="background:#E39B2D"></span><span class="sw" style="background:#C2412B"></span><span class="sw" style="background:#FBE7C4"></span></div>
+        <div class="swrow"><span class="mode">Dark</span><span class="sw" style="background:#08171B"></span><span class="sw" style="background:#4FBFCC"></span><span class="sw" style="background:#F0B457"></span><span class="sw" style="background:#FF7E66"></span><span class="sw" style="background:#0D3B43"></span></div>
+      </div>
+      <div class="typesample">
+        <span class="big" style="font-family:'Cairo',sans-serif;font-weight:800">عيلة حسين · Hussein Family</span>
+        <span class="small" style="font-family:'Cairo',sans-serif">Cairo for everything, heavy weight for titles</span>
+      </div>
+      <dl class="pc"><dt>Works well</dt><dd>Strongest identity. The densest list of the three.</dd><dt>Watch out</dt><dd>The pattern has to stay faint, especially in dark mode. It can feel less personal than 1.</dd></dl>
+    </div>
+    <div class="phones">
+      <figure><div class="phone" data-d="d3" data-lang="en" data-t="light" data-kind="list"></div><figcaption>Shopping list · English · light</figcaption></figure>
+      <figure><div class="phone" data-d="d3" data-lang="ar" data-t="dark" data-kind="sheet"></div><figcaption>Adding an item · Arabic · dark</figcaption></figure>
+    </div>
+  </section>
+
+  <section class="common" id="shared">
+    <h2>What changes in every direction</h2>
+    <p>These layout and behavior changes come with whichever look you pick.</p>
+    <div class="changes">
+      <div class="change"><h3>More room for the list</h3><p>The add form fills half the screen today. It becomes a slim bar at the bottom, and tapping it opens a sheet.</p></div>
+      <div class="change"><h3>Faster adding</h3><p>A quantity stepper and unit chips replace the dropdown. Due date has shortcuts: No rush, Today, Tomorrow, Pick a time.</p></div>
+      <div class="change"><h3>No instant "overdue"</h3><p>The due date becomes optional. Today it defaults to "now", so every new item turns red a minute after you add it.</p></div>
+      <div class="change"><h3>To buy, then Bought</h3><p>Bought items move to their own section at the bottom, with a Clear button to tidy up after a shop.</p></div>
+      <div class="change"><h3>Safer deleting</h3><p>Swipe a row to delete it, with an Undo bar for a few seconds. Today a red bin button on every row deletes on one tap.</p></div>
+      <div class="change"><h3>Family sheet</h3><p>Tap the member faces in the header to see members, switch language, leave or delete the family, and sign out. This replaces the side drawer.</p></div>
+      <div class="change"><h3>Real icons</h3><p>Ionicons, already in the project, replace emoji, so icons look the same on every phone.</p></div>
+      <div class="change"><h3>Arabic and English</h3><p>Full translation, right-to-left layout, Arabic-Indic digits (٢ كجم) and Arabic dates. Units read naturally: باكو, كرتونة.</p></div>
+      <div class="change"><h3>Sign-in and family screens</h3><p>Same look, with a two-tab switch (Sign in / Create account, Join / Create family) instead of stacked buttons.</p></div>
+      <div class="change"><h3>One theme system</h3><p>One file of color, spacing and type tokens, read through a useTheme() hook. The two duplicate color files go away.</p></div>
+    </div>
+    <div class="ask"><p>Reply with 1, 2 or 3. You can also mix, for example "2's colors with 1's lined rows".</p></div>
+  </section>
+</main>
+
+<script>
+const ICON = {
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+  plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>',
+  minus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M5 12h14"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>',
+  pen: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20l4-1 11-11-3-3L5 16l-1 4z"/></svg>',
+  bag: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8h12l-1 12H7L6 8z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>'
+};
+
+const AV_COLORS = ['#F2C6B4', '#BFD8F6', '#CDE8C5', '#F6DFA5'];
+
+const S = {
+  en: {
+    family: 'Hussein Family',
+    members: ['M', 'N', 'A', 'S'],
+    summary: '4 to buy · 1 overdue',
+    progress: '2 of 6 in the basket',
+    toBuy: 'To buy', bought: 'Bought', clear: 'Clear',
+    addPh: 'Add an item…',
+    items: [
+      { name: 'Tomatoes', qty: '2 kg', due: ['today', 'Today, 6:00 PM'], by: 'Nour' },
+      { name: 'Baladi bread', qty: '10 pcs', due: ['overdue', 'Overdue'], by: 'Ahmed' },
+      { name: 'Milk', qty: '2 L', by: 'Mohamed' },
+      { name: 'Eggs', qty: '1 box', due: ['later', 'Fri, 10:00 AM'], by: 'Nour' }
+    ],
+    done: [
+      { name: 'Rice', qty: '5 kg', by: 'Ahmed' },
+      { name: 'Dish soap', qty: '1 pcs', by: 'Mohamed' }
+    ]
+  },
+  ar: {
+    family: 'عيلة حسين',
+    members: ['م', 'ن', 'أ', 'س'],
+    summary: '٤ مطلوب · ١ متأخر',
+    progress: '٢ من ٦ في الشنطة',
+    toBuy: 'المطلوب', bought: 'اتشترى', clear: 'امسح',
+    addPh: 'ضيف طلب…',
+    items: [
+      { name: 'عيش بلدي', qty: '١٠ قطعة', due: ['overdue', 'متأخر'], by: 'أحمد' },
+      { name: 'لبن', qty: '٢ لتر', by: 'محمد' },
+      { name: 'بيض', qty: '١ كرتونة', due: ['later', 'الجمعة، ١٠:٠٠ ص'], by: 'نور' },
+      { name: 'جبنة بيضا', qty: '½ كجم', by: 'سلمى' }
+    ],
+    done: [
+      { name: 'رز', qty: '٥ كجم', by: 'أحمد' },
+      { name: 'صابون مواعين', qty: '١ قطعة', by: 'محمد' }
+    ],
+    sheet: {
+      title: 'طلب جديد', name: 'طماطم', qty: '٢',
+      unitLbl: 'الوحدة', units: ['قطعة', 'كجم', 'جم', 'لتر', 'مل', 'باكو', 'كرتونة'], unitOn: 1,
+      dueLbl: 'مطلوب إمتى؟', dues: ['مش مستعجل', 'النهارده، ٦ م', 'بكره', 'اختار ميعاد'], dueOn: 1,
+      btn: 'ضيف للطلبات'
+    }
+  }
+};
+
+function sbar() {
+  return '<div class="sbar"><span>9:41</span><span class="icons">' +
+    '<i style="width:3px;height:6px"></i><i style="width:3px;height:8px"></i><i style="width:3px;height:10px"></i>' +
+    '<i style="width:20px;height:10px;border-radius:3px;margin-left:4px"></i></span></div>';
+}
+
+function avatars(t) {
+  return '<div class="avatars">' + t.members.map((m, i) =>
+    `<span class="av" style="background:${AV_COLORS[i]}">${m}</span>`).join('') + ICON.chev + '</div>';
+}
+
+function row(it, done) {
+  const meta = [];
+  if (it.due) meta.push(`<span class="due ${it.due[0]}">${it.due[1]}</span>`);
+  if (it.by) meta.push(`<span>${it.by}</span>`);
+  return `<div class="row${done ? ' done' : ''}">` +
+    `<span class="cb${done ? ' on' : ''}">${done ? ICON.check : ''}</span>` +
+    `<div class="main"><div class="name">${it.name}</div><div class="meta">${meta.join('<span class="dot">·</span>')}</div></div>` +
+    `<span class="qty">${it.qty}</span></div>`;
+}
+
+function listScreen(d, t) {
+  const summary = `<div class="summary"><div class="subrow"><span class="stext">${d === 'd2' ? t.progress : t.summary}</span>${avatars(t)}</div>` +
+    (d === 'd2' ? '<div class="progress"><i></i></div>' : '') + '</div>';
+  const top = sbar() + `<div class="appbar"><div class="title">${t.family}</div></div>` + summary;
+  const head = d === 'd3' ? `<div class="band">${top}</div>` : top;
+  const list = '<div class="list">' +
+    `<div class="sec"><span>${t.toBuy} · ${t.items.length}</span></div>` +
+    t.items.map(it => row(it, false)).join('') +
+    `<div class="sec"><span>${t.bought} · ${t.done.length}</span><span class="clear">${t.clear}</span></div>` +
+    t.done.map(it => row(it, true)).join('') + '</div>';
+  const add = `<div class="addbar"><div class="in">${d === 'd1' ? ICON.pen : ICON.bag}<span>${t.addPh}</span></div><span class="plus">${ICON.plus}</span></div>`;
+  return head + list + add;
+}
+
+function sheet(t) {
+  const s = t.sheet;
+  return '<div class="scrim"></div><div class="sheet"><div class="handle"></div>' +
+    `<h3>${s.title}</h3>` +
+    `<div class="fieldrow"><div class="field">${s.name}</div><div class="stepper"><span>${ICON.minus}</span><b>${s.qty}</b><span>${ICON.plus}</span></div></div>` +
+    `<div><div class="lbl">${s.unitLbl}</div><div class="chips">${s.units.map((u, i) => `<span class="chip${i === s.unitOn ? ' on' : ''}">${u}</span>`).join('')}</div></div>` +
+    `<div><div class="lbl">${s.dueLbl}</div><div class="chips">${s.dues.map((u, i) => `<span class="chip${i === s.dueOn ? ' on' : ''}">${u}</span>`).join('')}</div></div>` +
+    `<div class="btn">${s.btn}</div></div>`;
+}
+
+document.querySelectorAll('.phone').forEach(el => {
+  const { d, lang, t: theme, kind } = el.dataset;
+  const t = S[lang];
+  const dir = lang === 'ar' ? 'rtl' : 'ltr';
+  el.innerHTML = `<div class="screen ${d} ${theme}" dir="${dir}" lang="${lang}">` +
+    listScreen(d, t) + (kind === 'sheet' ? sheet(t) : '') + '</div>';
+});
+</script>
+</body>
+</html>
