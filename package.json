@@ -10,7 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "test": "jest --selectProjects unit",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-talabat \"jest --selectProjects rules\"",
+    "test:rules": "firebase emulators:exec --only firestore --project demo-talabat \"jest --selectProjects rules --runInBand\"",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
