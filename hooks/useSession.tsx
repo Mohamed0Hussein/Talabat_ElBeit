@@ -2,7 +2,7 @@ import { type User, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, getDocFromServer, onSnapshot, waitForPendingWrites } from 'firebase/firestore';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { displayNameOf } from '@/lib/familyName';
-import { membershipStep } from '@/lib/membership';
+import { familyIdFromProfile, membershipStep } from '@/lib/membership';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { clearUserFamily, updateMyMember } from '@/services/families';
 import { auth, db } from '@/services/firebase';
@@ -48,8 +48,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       doc(db, 'users', uid),
       { includeMetadataChanges: true },
       (snap) => {
-        if (snap.metadata.hasPendingWrites) return;
-        setFamilyId((snap.data()?.familyId as string | null | undefined) ?? null);
+        const next = familyIdFromProfile({
+          exists: snap.exists(),
+          fromCache: snap.metadata.fromCache,
+          hasPendingWrites: snap.metadata.hasPendingWrites,
+          familyId: snap.data()?.familyId,
+        });
+        if (next !== 'unknown') setFamilyId(next);
       },
       () => setFamilyId(null),
     );

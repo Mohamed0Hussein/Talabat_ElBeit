@@ -11,3 +11,19 @@ export function membershipStep(exists: boolean | null, resubscribesUsed: number)
   if (!exists) return 'gone';
   return resubscribesUsed < MAX_RESUBSCRIBES ? 'resubscribe' : 'trust';
 }
+
+/**
+ * The family id from our profile snapshot, or 'unknown' when the snapshot can't be trusted yet:
+ * our own write is still unsaved, or we're offline and nothing is cached (Firestore then reports
+ * an empty profile, which must not be read as "no family").
+ */
+export function familyIdFromProfile(snap: {
+  exists: boolean;
+  fromCache: boolean;
+  hasPendingWrites: boolean;
+  familyId: unknown;
+}): string | null | 'unknown' {
+  if (snap.hasPendingWrites) return 'unknown';
+  if (!snap.exists && snap.fromCache) return 'unknown';
+  return typeof snap.familyId === 'string' ? snap.familyId : null;
+}
