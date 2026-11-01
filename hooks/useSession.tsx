@@ -2,6 +2,7 @@ import { type User, onAuthStateChanged } from 'firebase/auth';
 import { doc, getDoc, getDocFromServer, onSnapshot, waitForPendingWrites } from 'firebase/firestore';
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { displayNameOf } from '@/lib/familyName';
+import { membershipStep } from '@/lib/membership';
 import { useLanguage } from '@/i18n/LanguageProvider';
 import { clearUserFamily, updateMyMember } from '@/services/families';
 import { auth, db } from '@/services/firebase';
@@ -30,6 +31,8 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [notice, setNotice] = useState<SessionNotice>(null);
   // Bumped to re-subscribe when a listener failed only because our own write wasn't saved yet.
   const [resubscribe, setResubscribe] = useState(0);
+  // Re-subscribes used, counted per family so an earlier family's retries don't carry over.
+  const retries = useRef<{ familyId: string | null; used: number }>({ familyId: null, used: 0 });
   const memberRef = useRef<{ expoPushToken?: string; language?: string } | null>(null);
   const { lang } = useLanguage();
 
@@ -79,9 +82,13 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       const exists = await getDocFromServer(memberDoc)
         .then((s) => s.exists())
         .catch((e) => (isDenied(e) ? false : null));
-      if (exists === null) return; // offline: decide later
-      if (exists && resubscribe < 3) setResubscribe((n) => n + 1);
-      else if (!exists) gone();
+      if (retries.current.familyId !== familyId) retries.current = { familyId, used: 0 };
+      const step = membershipStep(exists, retries.current.used);
+      if (step === 'gone') gone();
+      else if (step === 'resubscribe') {
+        retries.current.used += 1;
+        setResubscribe((n) => n + 1);
+      } else if (step === 'trust') setMembership('ok'); // the server says we're a member; stop waiting
     };
     return onSnapshot(
       memberDoc,
