@@ -8,7 +8,8 @@
     "undo": "Undo",
     "you": "you",
     "decrease": "Less",
-    "increase": "More"
+    "increase": "More",
+    "delete": "Delete"
   },
   "auth": {
     "tagline": "One shopping list for the whole family.",

@@ -50,6 +50,9 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       if (handled) return;
       handled = true;
       setMembership('gone');
+      // Leaving or deleting the family ourselves clears users.familyId in the same write: no notice then.
+      const profile = await getDoc(doc(db, 'users', uid)).catch(() => null);
+      if (profile?.data()?.familyId !== familyId) return;
       // The join counter is readable by anyone signed in, so it tells deleted from removed.
       const stillExists = await getDoc(doc(db, 'families', familyId, 'meta', 'joinLimit'))
         .then((s) => s.exists())
@@ -95,9 +98,8 @@ export function useSession(): Session {
   return value;
 }
 
-/** The signed-in person as the services expect them. Only call on screens behind the sign-in guard. */
+/** The signed-in person as the services expect them. Empty while signing out. */
 export function useWho(): { uid: string; displayName: string } {
   const { user } = useSession();
-  if (!user) throw new Error('useWho needs a signed-in user');
-  return { uid: user.uid, displayName: displayNameOf(user) };
+  return { uid: user?.uid ?? '', displayName: user ? displayNameOf(user) : '' };
 }
