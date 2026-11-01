@@ -7,7 +7,7 @@ module.exports = {
     {
       displayName: 'unit',
       preset: 'jest-expo',
-      testMatch: ['<rootDir>/lib/**/*.test.ts', '<rootDir>/i18n/**/*.test.ts', '<rootDir>/hooks/**/*.test.ts?(x)'],
+      testMatch: ['<rootDir>/lib/**/*.test.ts', '<rootDir>/i18n/**/*.test.ts', '<rootDir>/hooks/**/*.test.ts?(x)', '<rootDir>/components/**/*.test.tsx'],
       moduleNameMapper: alias,
     },
     {

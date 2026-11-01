@@ -105,8 +105,7 @@ export default function ListScreen() {
   const onAdd = async (input: NewItem) => {
     if (!familyId) return;
     await addItem(db, familyId, who, input);
-    setToast({ message: t('addItem.added', { name: input.name }) });
-    notify('added', input.name);
+    notify('added', input.name); // the sheet itself confirms the add
   };
 
   const visible = items.filter((i) => i.id !== pendingDelete?.id);

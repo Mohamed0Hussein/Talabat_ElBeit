@@ -1,5 +1,6 @@
+import Ionicons from '@expo/vector-icons/Ionicons';
 import DateTimePicker, { DateTimePickerAndroid } from '@react-native-community/datetimepicker';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform, View } from 'react-native';
 import { AppText } from '@/components/ui/AppText';
@@ -24,7 +25,7 @@ type Props = { visible: boolean; onClose: () => void; onAdd: (item: NewItem) => 
 export function AddItemSheet({ visible, onClose, onAdd }: Props) {
   const { t } = useTranslation();
   const { lang } = useLanguage();
-  const { scheme } = useTheme();
+  const { scheme, c } = useTheme();
   const [name, setName] = useState('');
   const [quantity, setQuantity] = useState(1);
   const [unit, setUnit] = useState<Unit>('pcs');
@@ -32,6 +33,14 @@ export function AddItemSheet({ visible, onClose, onAdd }: Props) {
   const [picked, setPicked] = useState<Date | null>(null);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // The last item added, confirmed here because the list behind the sheet is covered.
+  const [added, setAdded] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!added) return;
+    const id = setTimeout(() => setAdded(null), 3000);
+    return () => clearTimeout(id);
+  }, [added]);
 
   const words = { today: t('due.today'), tomorrow: t('due.tomorrow'), yesterday: t('due.yesterday') };
 
@@ -71,6 +80,7 @@ export function AddItemSheet({ visible, onClose, onAdd }: Props) {
     try {
       await onAdd({ name: name.trim(), quantity, unit, dueAt });
       // Stay open for the next item.
+      setAdded(name.trim());
       setName('');
       setQuantity(1);
     } catch (e) {
@@ -88,9 +98,19 @@ export function AddItemSheet({ visible, onClose, onAdd }: Props) {
 
   return (
     <Sheet visible={visible} onClose={onClose} closeLabel={t('family.close')}>
-      <AppText variant="heading" accessibilityRole="header">
-        {t('addItem.title')}
-      </AppText>
+      <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12 }}>
+        <AppText variant="heading" accessibilityRole="header" style={{ flex: 1 }}>
+          {t('addItem.title')}
+        </AppText>
+        {added ? (
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4, flexShrink: 1 }} accessibilityLiveRegion="polite">
+            <Ionicons name="checkmark-circle" size={18} color={c.primary} />
+            <AppText variant="bodyStrong" tone="primary" numberOfLines={1} style={{ flexShrink: 1 }}>
+              {t('addItem.added', { name: added })}
+            </AppText>
+          </View>
+        ) : null}
+      </View>
       <View style={{ flexDirection: 'row', alignItems: 'flex-end', gap: 10 }}>
         <View style={{ flex: 1 }}>
           <TextField
