@@ -10,7 +10,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "IOS",
+      "bundleIdentifier": "com.mohamed0x1hussein.TalabatElBeit",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false
       }
@@ -30,6 +30,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-localization",
       [
         "expo-splash-screen",
         {
@@ -47,7 +48,8 @@
       "router": {},
       "eas": {
         "projectId": "72f3e5af-1098-4624-89ec-8070f2659b10"
-      }
+      },
+      "supportsRTL": true
     }
   }
 }
