@@ -55,6 +55,16 @@ npx firebase emulators:start --only auth,firestore --project demo-talabat
 
 Then start the app with `EXPO_PUBLIC_USE_EMULATORS=1` (in `.env.local` or on the command line).
 
+## Android APK
+
+GitHub builds an installable APK on every push to `master`. You can also start a build by hand: **Actions → Android APK → Run workflow**.
+
+1. Once, add six repository secrets under **Settings → Secrets and variables → Actions**, with the values from your Firebase web app config: `EXPO_PUBLIC_FIREBASE_API_KEY`, `EXPO_PUBLIC_FIREBASE_AUTH_DOMAIN`, `EXPO_PUBLIC_FIREBASE_PROJECT_ID`, `EXPO_PUBLIC_FIREBASE_STORAGE_BUCKET`, `EXPO_PUBLIC_FIREBASE_MESSAGING_SENDER_ID`, `EXPO_PUBLIC_FIREBASE_APP_ID`.
+2. Open the latest **Android APK** run under the **Actions** tab and download `talabat-elbeit-apk-N` from **Artifacts**. It's a zip with the APK inside.
+3. Copy the APK to the phone and open it. Android asks you to allow installing from that app the first time.
+
+The APK is signed with a development key: fine for installing directly, not for the Play Store. Each build has a higher version number, so a new APK installs over the old one. Push notifications on Android also need a `google-services.json` from Firebase.
+
 ## Security
 
 Family data is protected by [`firestore.rules`](firestore.rules), enforced by Firebase's servers. The app only displays what the rules allow.
