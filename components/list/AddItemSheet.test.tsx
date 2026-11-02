@@ -41,3 +41,19 @@ it('asks for a name instead of adding an empty item', () => {
   expect(screen.getByText('Write what you need first.')).toBeTruthy();
   expect(onAdd).not.toHaveBeenCalled();
 });
+
+it('goes back to "No rush" after each added item', async () => {
+  const onAdd = jest.fn().mockResolvedValue(undefined);
+  renderSheet(onAdd);
+  fireEvent.changeText(screen.getByLabelText('What do you need?'), 'Tomatoes');
+  fireEvent.press(screen.getByRole('button', { name: 'Today' }));
+  fireEvent.press(screen.getByText('Add to list'));
+  await waitFor(() => expect(screen.getByText('Added "Tomatoes"')).toBeTruthy());
+  expect(onAdd.mock.calls[0][0].dueAt).toBeInstanceOf(Date);
+
+  expect(screen.getByRole('button', { name: 'No rush' }).props.accessibilityState.selected).toBe(true);
+  fireEvent.changeText(screen.getByLabelText('What do you need?'), 'Milk');
+  fireEvent.press(screen.getByText('Add to list'));
+  await waitFor(() => expect(screen.getByText('Added "Milk"')).toBeTruthy());
+  expect(onAdd.mock.calls[1][0].dueAt).toBeNull();
+});

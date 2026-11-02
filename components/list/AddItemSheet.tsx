@@ -79,10 +79,12 @@ export function AddItemSheet({ visible, onClose, onAdd }: Props) {
     setBusy(true);
     try {
       await onAdd({ name: name.trim(), quantity, unit, dueAt });
-      // Stay open for the next item.
+      // Stay open for the next item. Keep the unit, but each item starts with no due date.
       setAdded(name.trim());
       setName('');
       setQuantity(1);
+      setDue('none');
+      setPicked(null);
     } catch (e) {
       setError(errorMessage(e, lang));
     } finally {
