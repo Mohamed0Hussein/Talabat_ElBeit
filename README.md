@@ -3,10 +3,16 @@
 A shared shopping list for the whole family, in Arabic and English. Built with Expo (React Native) and Firebase.
 
 <p>
-  <img src="docs/screenshots/list.png" width="200" alt="Shopping list in English">
-  <img src="docs/screenshots/add-item.png" width="200" alt="Adding an item">
-  <img src="docs/screenshots/list-arabic-dark.png" width="200" alt="Shopping list in Arabic, dark theme">
-  <img src="docs/screenshots/family.png" width="200" alt="Family sheet">
+  <img src="docs/screenshots/list.png" width="200" alt="Shopping list: overdue, today and tomorrow items, and bought items">
+  <img src="docs/screenshots/add-item.png" width="200" alt="Add-item sheet confirming the last item added">
+  <img src="docs/screenshots/family.png" width="200" alt="Family sheet for the creator: remove a member, change the family password">
+  <img src="docs/screenshots/list-arabic-dark.png" width="200" alt="Shopping list in Arabic, right to left, dark theme">
+</p>
+<p>
+  <img src="docs/screenshots/sign-in.png" width="200" alt="Sign in">
+  <img src="docs/screenshots/join-lockout.png" width="200" alt="Joining with a wrong family password: tries left before a wait">
+  <img src="docs/screenshots/waiting.png" width="200" alt="Waiting for a connection when offline">
+  <img src="docs/screenshots/family-deleted.png" width="200" alt="Notice after the family was deleted">
 </p>
 
 ## What it does
